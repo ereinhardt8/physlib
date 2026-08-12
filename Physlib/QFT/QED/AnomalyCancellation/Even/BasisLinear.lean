@@ -698,7 +698,7 @@ lemma P_P_P!_accCube (g : Fin n.succ → ℚ) (j : Fin n) :
     rw [P_evenFst, P_evenSnd]
     ring
   · intro k hkj
-    erw [basis!_on_evenShiftFst_other hkj.symm, basis!_on_evenShiftSnd_other hkj.symm]
+    rw [basis!_on_evenShiftFst_other hkj.symm, basis!_on_evenShiftSnd_other hkj.symm]
     simp only [mul_zero, add_zero]
 
 lemma P_P!_P!_accCube (g : Fin n → ℚ) (j : Fin n.succ) :
@@ -712,7 +712,7 @@ lemma P_P!_P!_accCube (g : Fin n → ℚ) (j : Fin n.succ) :
   · simp only [mul_one, mul_neg]
     ring
   · intro k hkj
-    erw [basis_on_evenFst_other hkj.symm, basis_on_evenSnd_other hkj.symm]
+    rw [basis_on_evenFst_other hkj.symm, basis_on_evenSnd_other hkj.symm]
     simp only [mul_zero, add_zero]
 
 /-!
@@ -793,7 +793,7 @@ lemma Pa_zero (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (h : Pa f g = 0) :
     have h2 := Pa_evenShiftSnd f g ⟨iv, succ_lt_succ_iff.mp hiv⟩
     rw [h] at h1 h2
     simp only [Fin.succ_mk, Fin.castSucc_mk] at h1 h2
-    erw [hi2] at h2
+    rw [hi2] at h2
     change 0 = _ at h2
     simp only [neg_zero, zero_sub, zero_eq_neg] at h2
     rw [h2] at h1
@@ -935,7 +935,7 @@ lemma span_basis_swap! {S : (PureU1 (2 * n.succ)).LinSols} (j : Fin n)
   use g
   use f'
   change P! f' = _ at hf'
-  erw [hf']
+  rw [hf']
   simp only [and_self, and_true, X]
   rw [← add_assoc, ← h]
   apply swap!_as_add at hS

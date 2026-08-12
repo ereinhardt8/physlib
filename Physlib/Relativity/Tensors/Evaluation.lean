@@ -286,7 +286,7 @@ lemma evalT_prodT_right {n n1 : ℕ} {c : Fin n → C} {c1 : Fin (n1 + 1) → C}
             · simp only [Fin.lt_def, Fin.val_castSucc, Fin.val_castAdd, Fin.val_natAdd]
               omega
           simp only [id_eq]
-          erw [ComponentIdx.congr_right (ComponentIdx.prod.symm (b, b1)) _ _ hidx]
+          rw [ComponentIdx.congr_right (ComponentIdx.prod.symm (b, b1)) _ _ hidx]
           simp only [ComponentIdx.prod_symm_castAdd]
           exact basisIdxCongr_heq_arg _ _ (by
             simp only [basisIdxCongr, Equiv.cast_apply]
@@ -302,7 +302,7 @@ lemma evalT_prodT_right {n n1 : ℕ} {c : Fin n → C} {c1 : Fin (n1 + 1) → C}
             simp only [Fin.succAbove, hcond]
             split_ifs <;> ext <;> simp [Nat.add_assoc]
           simp only [id_eq]
-          erw [ComponentIdx.congr_right (ComponentIdx.prod.symm (b, b1)) _ _ hidx]
+          rw [ComponentIdx.congr_right (ComponentIdx.prod.symm (b, b1)) _ _ hidx]
           simp only [ComponentIdx.prod_symm_natAdd]
           exact basisIdxCongr_heq_arg _ _ (by
             simp only [basisIdxCongr, Equiv.cast_apply]

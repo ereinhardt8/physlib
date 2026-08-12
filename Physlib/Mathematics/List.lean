@@ -454,7 +454,7 @@ lemma orderedInsertEquiv_sigma {I : Type} {f : I → Type}
   | ⟨Nat.succ n, h0⟩ =>
     simp only [Nat.succ_eq_add_one, Equiv.trans_apply, RelIso.coe_fn_toEquiv,
       Fin.castOrderIso_apply, Fin.cast_mk, Fin.val_cast]
-    erw [orderedInsertEquiv_succ, orderedInsertEquiv_succ]
+    rw [orderedInsertEquiv_succ, orderedInsertEquiv_succ]
     simp only [orderedInsertPos_sigma, Fin.val_cast]
     rw [Fin.succAbove, Fin.succAbove]
     simp only [Fin.castSucc_mk, Fin.mk_lt_mk, Fin.succ_mk]
@@ -501,7 +501,7 @@ lemma orderedInsert_eq_insertIdx_orderedInsertPos {I : Type} (le1 : I → I → 
     simp only [Fin.succAbove, Fin.castSucc_mk, Fin.mk_lt_mk, Fin.succ_mk, List.get_eq_getElem]
     by_cases hn' : n' < ↑(orderedInsertPos le1 r r0)
     · simp only [hn', ↓reduceIte]
-      erw [List.getElem_insertIdx_of_lt]
+      rw [List.getElem_insertIdx_of_lt]
       exact hn'
     · simp only [hn', ↓reduceIte]
       rw [List.getElem_insertIdx_of_gt]

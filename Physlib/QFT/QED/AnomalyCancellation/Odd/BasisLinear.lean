@@ -662,7 +662,7 @@ lemma P_P_P!_accCube (g : Fin n → ℚ) (j : Fin n) :
   · rw [← oddSnd_eq_oddShiftSnd, P_oddSnd]
     ring
   · intro k hkj
-    erw [basis!_on_oddShiftFst_other hkj.symm, basis!_on_oddShiftSnd_other hkj.symm]
+    rw [basis!_on_oddShiftFst_other hkj.symm, basis!_on_oddShiftSnd_other hkj.symm]
     simp only [mul_zero, add_zero]
 
 /-!
@@ -841,7 +841,7 @@ lemma Pa_eq (g g' : Fin n.succ → ℚ) (f f' : Fin n.succ → ℚ) :
 
 lemma basisa_card : Fintype.card ((Fin n.succ) ⊕ (Fin n.succ)) =
     Module.finrank ℚ (PureU1 (2 * n.succ + 1)).LinSols := by
-  erw [BasisLinear.finrank_AnomalyFreeLinear]
+  rw [BasisLinear.finrank_AnomalyFreeLinear]
   simp [Fintype.card_sum, Fintype.card_fin, two_mul]
 
 /-!
@@ -896,7 +896,7 @@ lemma span_basis_swap! {S : (PureU1 (2 * n.succ + 1)).LinSols} (j : Fin n.succ)
   obtain ⟨f', hf'⟩ := (Submodule.mem_span_range_iff_exists_fun ℚ).mp hX
   use g, f'
   change P! f' = _ at hf'
-  erw [hf']
+  rw [hf']
   simp only [and_self, and_true, X]
   rw [← add_assoc, ← hS1]
   apply swap!_as_add at hS

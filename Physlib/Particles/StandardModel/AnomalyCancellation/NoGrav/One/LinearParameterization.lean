@@ -126,7 +126,7 @@ def bijection : linearParameters ≃ (SMNoGrav 1).LinSols where
     apply linearParameters.ext
     · rfl
     · simp only [Fin.isValue]
-      repeat erw [asLinear_val]
+      repeat rw [asLinear_val]
       simp only [Fin.isValue, toSpecies_apply]
       repeat erw [speciesVal]
       simp only [asCharges, neg_add_rev]

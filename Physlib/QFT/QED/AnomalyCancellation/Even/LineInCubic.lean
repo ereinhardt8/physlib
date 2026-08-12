@@ -80,7 +80,7 @@ lemma lineInCubicPerm_permute {S : (PureU1 (2 * n.succ)).LinSols}
     LineInCubicPerm ((FamilyPermutations (2 * n.succ)).linSolRep M' S) := by
   intro M
   have h := hS (M * M')
-  erw [(FamilyPermutations (2 * n.succ)).linSolRep.map_mul M M'] at h
+  rw [(FamilyPermutations (2 * n.succ)).linSolRep.map_mul M M'] at h
   exact h
 
 set_option backward.isDefEq.respectTransparency false in

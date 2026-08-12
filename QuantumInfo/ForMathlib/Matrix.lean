@@ -1191,7 +1191,7 @@ lemma sub_iInf_eignevalues (hA : A.IsHermitian) :
       have := hA.spectral_theorem;
       refine' ⟨ _, _, _, this, _ ⟩;
       · simp [ ← Matrix.ext_iff ];
-        intro i j; erw [ Matrix.mul_apply ] ; simp [ Matrix.one_apply ] ;
+        intro i j; rw [ Matrix.mul_apply ] ; simp [ Matrix.one_apply ] ;
         have := hA.eigenvectorBasis.orthonormal;
         rw [ orthonormal_iff_ite ] at this;
         rw [← this i j]

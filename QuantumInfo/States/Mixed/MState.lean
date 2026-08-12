@@ -1154,7 +1154,7 @@ lemma multiset_spectrum_relabel_eq {d₁ d₂ : Type*} [Fintype d₁] [Decidable
   · rw [ Multiset.count_map, Multiset.count_map ];
     simp [ Subtype.ext_iff ];
     congr! 2;
-  · erw [ Multiset.count_map, Multiset.count_map ];
+  · rw [ Multiset.count_map, Multiset.count_map ];
     congr! 2;
     exact beq_eq_beq.mp rfl
 

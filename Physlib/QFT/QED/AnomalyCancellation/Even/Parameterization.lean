@@ -143,7 +143,7 @@ lemma special_case_lineInCubic {S : (PureU1 (2 * n.succ)).Sols}
   rw [anomalyFree_param _ _ hS] at h
   simp only [Nat.succ_eq_add_one, accCubeTriLinSymm_toFun_apply_apply, neg_eq_zero] at h
   change accCubeTriLinSymm (P! f) (P! f) (P g) = 0 at h
-  erw [h]
+  rw [h]
   simp
 
 lemma special_case_lineInCubic_perm {S : (PureU1 (2 * n.succ)).Sols}
