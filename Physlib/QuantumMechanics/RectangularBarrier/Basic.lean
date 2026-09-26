@@ -8,6 +8,7 @@ module
 public import Physlib.Meta.Informal.Basic
 public import Physlib.QuantumMechanics.Operators.Momentum
 public import Physlib.QuantumMechanics.Operators.Multiplication
+public import Physlib.QuantumMechanics.Operators.SpectralTheory.Symmetric
 public import Physlib.QuantumMechanics.QuantumSystem.Basic
 /-!
 
@@ -41,7 +42,7 @@ on a closed interval and zero elsewhere.
 noncomputable section
 namespace QuantumMechanics
 
-open Set MeasureTheory SpaceDHilbertSpace
+open Set MeasureTheory SpaceDHilbertSpace LinearPMap
 
 /-- A quantum particle with mass `m > 0` on `Space 1` subject to a rectangular potential barrier.
 
@@ -116,6 +117,10 @@ abbrev HS (_ : RectangularBarrier) : Type _ := SpaceDHilbertSpace 1
 /-- The kinetic energy operator, `p²/2m`. -/
 def kineticOperator : Q.HS →ₗ.[ℂ] Q.HS := (2 * Q.m)⁻¹ • momentumSqOperator
 
+lemma kineticOperator_isSymmetric (Q : RectangularBarrier) : IsSymmetric Q.kineticOperator := by
+  apply IsSymmetric.real_smul
+  exact momentumSqOperator_isSymmetric
+
 /-!
 ### D.2. Potential
 -/
@@ -130,24 +135,73 @@ lemma potentialOperator_isSelfAdjoint (Q : RectangularBarrier) :
   unfold potentialOperator
   rw [mulOperator_isSelfAdjoint_ofReal]
   swap
-  ext x
-  simp only [Function.comp_apply, Complex.conj_ofReal]
-  have hQ := potentialFunction_aestronglyMeasurable
-  fun_prop
+  · ext x
+    simp only [Function.comp_apply, Complex.conj_ofReal]
+  · have hQ := potentialFunction_aestronglyMeasurable
+    fun_prop
+
+lemma potentialOperator_isSymmetric (Q : RectangularBarrier) :
+    IsSymmetric Q.potentialOperator := by
+  exact LinearPMap.IsSelfAdjoint.isSymmetric Q.potentialOperator_isSelfAdjoint
 
 /-!
 ### D.3. Hamiltonian
 -/
 
 /-- The Hamiltonian for the rectangular barrier. -/
-informal_definition hamiltonian where
-  deps := [``RectangularBarrier]
-  tag := "QM-RB-ham"
+def hamiltonian : Q.HS →ₗ.[ℂ] Q.HS := Q.kineticOperator + Q.potentialOperator
+
+lemma hamiltonain_eq : Q.hamiltonian = Q.kineticOperator + Q.potentialOperator := rfl
+
+
+-- lemma hamiltonian_isSelfAdjoint (Q : RectangularBarrier) :
+--      IsSelfAdjoint Q.hamiltonian := by
+--   unfold IsSelfAdjoint
+--   sorry
+--   unfold hamiltonian
+--   unfold kineticOperator
+--   unfold potentialOperator
+--   sorry
+
+lemma hamiltonian_isSymmetric (Q: RectangularBarrier) :
+    IsSymmetric Q.hamiltonian := by
+  unfold hamiltonian
+  apply IsSymmetric.add --(T₁ := Q.kineticOperator) (T₂ := Q.potentialOperator)
+  · exact Q.kineticOperator_isSymmetric
+  · exact Q.potentialOperator_isSymmetric
+
+lemma hamiltonian_hasDenseDomain (Q: RectangularBarrier) :
+    HasDenseDomain Q.hamiltonian := by
+  sorry
 
 /-- The Hamiltonian for the rectangular barrier is essentially self-adjoint. -/
-informal_lemma hamiltonian_essentially_self_adjoint where
-  deps := [``RectangularBarrier.hamiltonian]
-  tag := "QM-RB-hamESA"
+-- informal_lemma hamiltonian_essentially_self_adjoint where
+--   deps := [``RectangularBarrier.hamiltonian]
+--   tag := "QM-RB-hamESA"
+-- lemma hamiltonian_isEssentiallySelfAdjoint (Q : RectangularBarrier) :
+--     IsEssentiallySelfAdjoint Q.hamiltonian := by
+--   apply IsSelfAdjoint.isEssentiallySelfAdjoint
+--   apply hamiltonian_isSelfAdjoint
+lemma hamiltonian_isEssentiallySelfAdjoint (Q : RectangularBarrier) :
+    IsEssentiallySelfAdjoint Q.hamiltonian := by
+  apply (IsSymmetric.isEssentiallySelfAdjoint_of_defectNumber_eq_zero Q.hamiltonian_isSymmetric Q.hamiltonian_hasDenseDomain)
+  · rw [defectNumber_eq]
+    rw [Q.hamiltonain_eq]
+    sorry
+  · sorry
+
+
+
+  --apply (LinearPMap.adjointDomain Q.hamiltonian.closure)
+  --apply LinearPMap.isSymmetric.isEssentiallySelfAdjoint_of_defectNumber_eq_zero
+
+  -- prove that H is symmetric:
+    -- kinetic is symmetric (square of momentum)
+    -- potential is symmetric (being self-adjoint)
+    -- their sum is symmetric
+  -- use either Symmetric.isEssentiallySelfAdjoint_iff or isEssentiallySelfAdjoint_of_defectNumber_eq_zero
+
+#print axioms hamiltonian_isEssentiallySelfAdjoint
 
 /-!
 ## E. As a quantum system
@@ -155,9 +209,8 @@ informal_lemma hamiltonian_essentially_self_adjoint where
 
 /-- The rectangular barrier as a quantum system
   (self-adjoint Hamiltonian acting on a Hilbert space). -/
-informal_definition toQuantumSystem where
-  deps := [``RectangularBarrier.hamiltonian_essentially_self_adjoint]
-  tag := "QM-RB-sys"
+def toQuantumSystem (Q: RectangularBarrier) :=
+  QuantumSystem.mkESA Q.hamiltonian_isEssentiallySelfAdjoint
 
 end RectangularBarrier
 end QuantumMechanics

@@ -156,5 +156,15 @@ lemma momentumSqOperator_domain_eq : momentumSqOperator.domain = SchwartzSubmodu
     rw [← iInf_const (a := SchwartzSubmodule d) (ι := Fin d)]
     congr
 
+lemma momentumSqOperator_isSymmetric : IsSymmetric (H := SpaceDHilbertSpace d) (momentumSqOperator) := by
+  intro ψ φ
+  --unfold momentumSqOperator
+  simp [momentumSqOperator_eq]
+  rw [inner_sum]
+  --simp [LinearPMap.compRestricted_eq_comp]
+  --rw [← LinearPMap.compRestricted_eq_comp]
+  --rw [LinearMap.comp_apply]
+  sorry
+
 end
 end QuantumMechanics
