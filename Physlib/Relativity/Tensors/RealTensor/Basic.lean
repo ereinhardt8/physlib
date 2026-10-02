@@ -25,7 +25,7 @@ open TensorProduct
 namespace realLorentzTensor
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The colors associated with real representations of SO⁺(1, 3) of interest to physics. -/
+/-- The colors associated with real representations of O(1, 3) of interest to physics. -/
 inductive Color
   /-- The color associated with contravariant Lorentz vectors. -/
   | up : Color
