@@ -47,8 +47,7 @@ We will show that these two multisets have the same elements.
 
 ## iv. References
 
-There are no known references for this material.
-
+* None.
 -/
 
 @[expose] public section
@@ -70,8 +69,8 @@ This is slow to compute in practice.
 
 -/
 
-/-- Given a charges `x : Charges` associated to the representations, and a potential
-  term `T`, the charges associated with instances of that potential term. -/
+/-- Given a charge spectrum `x : ChargeSpectrum 𝓩` associated to the representations, and a
+  potential term `T`, the charges associated with instances of that potential term. -/
 def ofPotentialTerm (x : ChargeSpectrum 𝓩) (T : PotentialTerm) : Multiset 𝓩 :=
   let add : Multiset 𝓩 → Multiset 𝓩 → Multiset 𝓩 := fun a b => (a ×ˢ b).map
       fun (x, y) => x + y

@@ -5,11 +5,7 @@ Authors: Joseph Tooby-Smith
 -/
 module
 
-public import Physlib.Relativity.Tensors.ComponentIdx.Single
 public import Physlib.Relativity.Tensors.Contraction.SuccSuccAbove
-public import Mathlib.Topology.Algebra.Module.ModuleTopology
-public import Mathlib.Analysis.RCLike.Basic
-public import Mathlib.Tactic.Cases
 public import Mathlib.GroupTheory.Perm.Fin
 /-!
 
@@ -62,17 +58,13 @@ lemma append_succAbove_const_eq_cycleIcc {n : ℕ} (i : Fin (n + 1)) :
   · rw [Fin.append_right]
     have : (Fin.natAdd n a : Fin (n + 1)) = Fin.last n := by
       apply Fin.ext; simp [Fin.val_natAdd]
-    rw [this, Fin.cycleIcc_of_le_of_le (Fin.le_last _) (Fin.le_last _), if_pos rfl]
+    rw [this, Fin.cycleIcc_of_le_of_le (Fin.le_last _) (Fin.le_last _), ite_eq_left rfl]
 
 end Fin
 
 namespace TensorSpecies
 
-variable {k : Type} [CommRing k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
-    (S : TensorSpecies k C G V basisIdx rep b)
+variable {C : Type}
 
 namespace Tensor
 
@@ -142,6 +134,32 @@ lemma inv_apply_apply {n m : ℕ} {c : Fin n → C} {c1 : Fin m → C}
     σ (h.inv σ x) = x := by
   change h.toEquiv.symm (h.toEquiv x) = x
   simp
+
+lemma inv_eq_self_of_pointwise_eq {n : ℕ} {c c1 : Fin n → C} {σ : Fin n → Fin n}
+    (h : IsReindexing c c1 σ) (hσ : ∀ x, σ x = x) (x : Fin n) :
+    h.inv σ x = x := by
+  have hx := h.inv_apply_apply σ x
+  rw [hσ] at hx
+  exact hx
+
+lemma inv_id_eq {n : ℕ} {c c1 : Fin n → C}
+    (h : IsReindexing c c1 (id : Fin n → Fin n)) (x : Fin n) :
+    h.inv (id : Fin n → Fin n) x = x :=
+  h.inv_apply_apply (id : Fin n → Fin n) x
+
+lemma inv_cast_eq {n m : ℕ} {c : Fin n → C} {c1 : Fin m → C} (e : m = n)
+    (h : IsReindexing c c1 (Fin.cast e)) (x : Fin n) :
+    h.inv (Fin.cast e) x = Fin.cast e.symm x := by
+  have hx := h.inv_apply_apply (Fin.cast e) x
+  have hval : (h.inv (Fin.cast e) x).val = x.val := congrArg Fin.val hx
+  exact Fin.val_inj.mp hval
+
+lemma inv_equiv_symm_eq {n : ℕ} {c c1 : Fin n → C} (e : Equiv.Perm (Fin n))
+    (h : IsReindexing c c1 ⇑e.symm) (x : Fin n) :
+    h.inv ⇑e.symm x = e x := by
+  have hx := h.inv_apply_apply ⇑e.symm x
+  apply e.symm.injective
+  rw [hx, Equiv.symm_apply_apply]
 
 lemma preserve_color {n m : ℕ} {c : Fin n → C} {c1 : Fin m → C}
     {σ : Fin m → Fin n} (h : IsReindexing c c1 σ) :
@@ -491,10 +509,7 @@ lemma succSuccAbove_succAbove_comm {n : ℕ} {c : Fin (n + 1 + 1 + 1) → C}
   refine ⟨Function.bijective_id, fun m => ?_⟩
   simp only [id_eq, Function.comp_apply]
   congr 1
-  apply Fin.val_injective
-  simp only [Fin.succSuccAbove, Fin.succAbove, lt_def, val_castSucc,
-    val_succ, apply_ite Fin.val, apply_dite Fin.val, Fin.predAbove, Fin.castPred]
-  grind (splits := 60)
+  exact Fin.succSuccAbove_succAbove_comm_apply i j k m
 
 /-- Removing two single entries from `c` in either order gives the same colour list:
   removing the `k1`-th entry and then the (shifted) `k2`-th entry matches removing the

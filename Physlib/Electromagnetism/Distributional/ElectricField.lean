@@ -8,7 +8,6 @@ module
 public import Physlib.Electromagnetism.Distributional.VectorPotential
 public import Physlib.Electromagnetism.Distributional.ScalarPotential
 public import Physlib.Electromagnetism.Distributional.FieldStrength
-public import Physlib.Electromagnetism.Basic
 /-!
 
 # The Electric Field
@@ -31,6 +30,7 @@ In this module we define the electric field, and prove lemmas about it.
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section

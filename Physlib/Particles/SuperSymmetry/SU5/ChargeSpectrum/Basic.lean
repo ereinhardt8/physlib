@@ -52,9 +52,8 @@ of the charge spectrum, which can help in searching for viable theories.
 
 ## iv. References
 
-There are no known references for charge spectra in the literature.
-They were created specifically for the purpose of Physlib.
-
+* None — these charge spectra were created specifically for the purpose of
+  Physlib; there is no external reference.
 -/
 
 @[expose] public section
@@ -291,8 +290,8 @@ lemma _root_.Option.mem_powerset_iff {x : Option 𝓩} (y : Option 𝓩) :
     y ∈ x.powerset ↔ y.toFinset ⊆ x.toFinset := by
   cases x <;> cases y <;> simp [Option.powerset]
 
-/-- The powerset of a charge . Given a charge `x : Charges`
-  it's powerset is the finite set of all `Charges` which are subsets of `x`. -/
+/-- The powerset of a charge spectrum. Given a charge spectrum `x : ChargeSpectrum 𝓩`
+  its powerset is the finite set of all `ChargeSpectrum 𝓩` which are subsets of `x`. -/
 def powerset (x : ChargeSpectrum 𝓩) : Finset (ChargeSpectrum 𝓩) :=
   (x.qHd.powerset.product <| x.qHu.powerset.product <| x.Q5.powerset.product <|
     x.Q10.powerset).map toProd.symm.toEmbedding

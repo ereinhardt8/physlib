@@ -5,7 +5,7 @@ Authors: Joseph Tooby-Smith
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Physlib.Units.PositiveRealUnit
 /-!
 
 # Units on Length
@@ -22,6 +22,17 @@ To define specific length units, we first state the existence of a
 a given length unit, and then construct all other length units from it. We choose to state the
 existence of the length unit of meters, and construct all other length units from that.
 
+## References
+
+* The BIPM SI Brochure, for the meter, the speed of light, and SI prefixes.
+  [ref: bipm_si_brochure_2019]
+* NIST Handbook 44, Appendix C, for the international foot-based units and the international
+  nautical mile. [ref: nist_hb44_2023]
+* IAU 2012 Resolution B2, for the astronomical unit. [ref: iau_2012_resolution_b2]
+* The IAU Style Manual recommendations, for the Julian year convention used in the light-year.
+  [ref: iau_style_manual_units]
+* IAU 2015 Resolution B2, for the exact parsec convention. [ref: iau_2015_resolution_b2]
+
 -/
 
 @[expose] public section
@@ -33,100 +44,18 @@ structure LengthUnit where
   val : ℝ
   property : 0 < val
 
-namespace LengthUnit
-
-@[simp]
-lemma val_ne_zero (x : LengthUnit) : x.val ≠ 0 := by
-  exact Ne.symm (ne_of_lt x.property)
-
-lemma val_pos (x : LengthUnit) : 0 < x.val := x.property
-
-instance : Inhabited LengthUnit where
-  default := ⟨1, by norm_num⟩
-
-/-!
-
-## Division of LengthUnit
-
--/
-
+instance : PositiveRealUnitCore LengthUnit where
+  val := LengthUnit.val
+  pos := LengthUnit.property
+  ofVal := fun r hr => ⟨r, hr⟩
+  val_ofVal := by intros; rfl
+  ofVal_val := by intro x; cases x; rfl
 open NNReal
 
-noncomputable instance : HDiv LengthUnit LengthUnit ℝ≥0 where
-  hDiv x t := ⟨x.val / t.val, div_nonneg (le_of_lt x.val_pos) (le_of_lt t.val_pos)⟩
+namespace LengthUnit
 
-lemma div_eq_val (x y : LengthUnit) :
-    (x / y) = (⟨x.val / y.val, div_nonneg (le_of_lt x.val_pos) (le_of_lt y.val_pos)⟩ : ℝ≥0) := rfl
+open PositiveRealUnitCore
 
-@[simp]
-lemma div_ne_zero (x y : LengthUnit) : ¬ x / y = (0 : ℝ≥0) := by
-  rw [div_eq_val]
-  refine coe_ne_zero.mp ?_
-  simp [toReal]
-
-@[simp]
-lemma div_pos (x y : LengthUnit) : (0 : ℝ≥0) < x/ y := by
-  apply lt_of_le_of_ne
-  · exact zero_le
-  · exact Ne.symm (div_ne_zero x y)
-
-@[simp]
-lemma div_self (x : LengthUnit) :
-    x / x = (1 : ℝ≥0) := by
-  simp [div_eq_val, x.val_ne_zero]
-  rfl
-
-lemma div_symm (x y : LengthUnit) :
-    x / y = (y / x)⁻¹ := NNReal.eq <| by
-  rw [div_eq_val, inv_eq_one_div, div_eq_val]
-  simp only [one_div, NNReal.coe_inv]
-  rw [toReal, inv_div]
-
-@[simp]
-lemma div_mul_div_coe (x y z : LengthUnit) :
-    (x / y : ℝ) * (y / z : ℝ) = x / z := by
-  simp [div_eq_val, toReal]
-  field_simp
-
-/-!
-
-## The scaling of a length unit
-
--/
-
-/-- The scaling of a length unit by a positive real. -/
-def scale (r : ℝ) (x : LengthUnit) (hr : 0 < r := by norm_num) : LengthUnit :=
-  ⟨r * x.val, mul_pos hr x.val_pos⟩
-
-@[simp]
-lemma scale_div_self (x : LengthUnit) (r : ℝ) (hr : 0 < r) :
-    scale r x hr / x = (⟨r, le_of_lt hr⟩ : ℝ≥0) := by
-  simp [scale, div_eq_val]
-
-@[simp]
-lemma self_div_scale (x : LengthUnit) (r : ℝ) (hr : 0 < r) :
-    x / scale r x hr = (⟨1/r, _root_.div_nonneg (by simp) (le_of_lt hr)⟩ : ℝ≥0) := by
-  simp [scale, div_eq_val]
-
-  field_simp
-
-@[simp]
-lemma scale_one (x : LengthUnit) : scale 1 x = x := by
-  simp [scale]
-
-@[simp]
-lemma scale_div_scale (x1 x2 : LengthUnit) {r1 r2 : ℝ} (hr1 : 0 < r1) (hr2 : 0 < r2) :
-    scale r1 x1 hr1 / scale r2 x2 hr2 = (⟨r1, le_of_lt hr1⟩ / ⟨r2, le_of_lt hr2⟩) * (x1 / x2) := by
-  refine NNReal.eq ?_
-  simp [scale, div_eq_val]
-  rw [toReal]
-  field_simp
-
-@[simp]
-lemma scale_scale (x : LengthUnit) (r1 r2 : ℝ) (hr1 : 0 < r1) (hr2 : 0 < r2) :
-    scale r1 (scale r2 x hr2) hr1 = scale (r1 * r2) x (mul_pos hr1 hr2) := by
-  simp [scale]
-  ring
 /-!
 
 ## Specific choices of Length units
@@ -139,17 +68,17 @@ From this choice of meters, we can define other length units by scaling meters.
 
 The references for the numerical definitions used below are:
 * the BIPM SI Brochure for the meter, the speed of light, and SI prefixes:
-  https://www.bipm.org/documents/d/guest/si-brochure-9-en-pdf
+  https://www.bipm.org/documents/d/guest/si-brochure-9-en-pdf [ref: bipm_si_brochure_2019]
 * NIST Handbook 44, Appendix C, for the international foot-based units and
   the international nautical mile:
-  https://doi.org/10.6028/NIST.HB.44-2023
+  https://doi.org/10.6028/NIST.HB.44-2023 [ref: nist_hb44_2023]
 * IAU 2012 Resolution B2 for the astronomical unit:
-  https://iauarchive.eso.org/static/resolutions/IAU2012_English.pdf
+  https://iauarchive.eso.org/static/resolutions/IAU2012_English.pdf [ref: iau_2012_resolution_b2]
 * the IAU Style Manual recommendations for the Julian year convention used in
   the light-year:
-  https://iauarchive.eso.org/publications/proceedings_rules/units/
+  https://iauarchive.eso.org/publications/proceedings_rules/units/ [ref: iau_style_manual_units]
 * IAU 2015 Resolution B2 for the exact parsec convention:
-  https://iauarchive.eso.org/static/resolutions/IAU2015_English.pdf
+  https://iauarchive.eso.org/static/resolutions/IAU2015_English.pdf [ref: iau_2015_resolution_b2]
 
 -/
 
@@ -222,10 +151,17 @@ noncomputable def parsecs : LengthUnit := scale (648000/Real.pi) astronomicalUni
 
 /-- There are exactly 1760 yards in a mile. -/
 lemma miles_div_yards : miles / yards = (⟨1760, by norm_num⟩ : ℝ≥0) :=
-  NNReal.eq <| by simp [miles, yards]; rw [toReal]; norm_num
+  NNReal.eq <| by
+    simp [miles, yards]
+    show (1609.344 : ℝ) / 0.9144 = ((⟨1760, by norm_num⟩ : ℝ≥0) : ℝ)
+    push_cast
+    norm_num
 
 /-- There are exactly 220 yards in a furlong. -/
 lemma furlongs_div_yards : furlongs / yards = (⟨220, by norm_num⟩ : ℝ≥0) := NNReal.eq <| by
-  simp [furlongs, yards]; rw [toReal]; norm_num
+  simp [furlongs, yards]
+  show (201.168 : ℝ) / 0.9144 = ((⟨220, by norm_num⟩ : ℝ≥0) : ℝ)
+  push_cast
+  norm_num
 
 end LengthUnit

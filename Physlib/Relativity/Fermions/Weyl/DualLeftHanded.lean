@@ -6,10 +6,9 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Mathlib.Analysis.Complex.Basic
-public import Physlib.Meta.TODO.Basic
-public import Physlib.Relativity.SL2C.Basic
-public import Physlib.Meta.Informal.Basic
-public import Physlib.Meta.TODO.Basic
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
 /-!
 
 ## Dual left handed Weyl fermions
@@ -21,10 +20,8 @@ and we consider them to have down indices `ψ_α` with `α = 1,2`.
 
 ### References
 
-A good reference for the material in this file is:
-https://particle.physics.ucdavis.edu/modernsusy/slides/slideimages/spinorfeynrules.pdf
-Although a different index convention is used there.
-
+* A good reference for the material in this file, although it uses a different
+  index convention: https://particle.physics.ucdavis.edu/modernsusy/slides/slideimages/spinorfeynrules.pdf. [ref: ucdavis_spinorfeynrules]
 -/
 
 @[expose] public section
@@ -64,9 +61,13 @@ instance : AddCommMonoid DualLeftHandedWeyl := Equiv.addCommMonoid toFin2ℂFun
   with `Fin 2 → ℂ`. -/
 instance : AddCommGroup DualLeftHandedWeyl := Equiv.addCommGroup toFin2ℂFun
 
+/-- The additive equivalence between `DualLeftHandedWeyl` and `Fin 2 → ℂ`. -/
+def toFin2ℂAddEquiv : DualLeftHandedWeyl ≃+ (Fin 2 → ℂ) :=
+  { toFin2ℂFun with map_add' _ _ := rfl }
+
 /-- The instance of `Module` on `DualLeftHandedWeyl` defined via its equivalence
   with `Fin 2 → ℂ`. -/
-instance : Module ℂ DualLeftHandedWeyl := Equiv.module ℂ toFin2ℂFun
+instance : Module ℂ DualLeftHandedWeyl := AddEquiv.module ℂ toFin2ℂAddEquiv
 
 /-- The linear equivalence between `DualLeftHandedWeyl` and `(Fin 2 → ℂ)`. -/
 @[simps!]
@@ -92,13 +93,12 @@ lemma toFin2ℂ_eq_val (ψ : DualLeftHandedWeyl) : ψ.toFin2ℂ = ψ.val := rfl
 
 /-- The standard basis on dual-left-handed Weyl fermions. -/
 def basis : Basis (Fin 2) ℂ DualLeftHandedWeyl := Basis.ofEquivFun
-  (Equiv.linearEquiv ℂ DualLeftHandedWeyl.toFin2ℂFun)
+  (AddEquiv.linearEquiv ℂ DualLeftHandedWeyl.toFin2ℂAddEquiv)
 
 lemma basis_apply (i j : Fin 2) : (basis i).1 j = if j = i then 1 else 0 := by
-  simp only [basis, Equiv.linearEquiv, AddEquiv.toEquiv_eq_coe, Equiv.toFun_as_coe,
+  simp only [basis, AddEquiv.linearEquiv, AddEquiv.toEquiv_eq_coe, Equiv.toFun_as_coe,
     EquivLike.coe_coe, Equiv.invFun_as_coe, AddEquiv.coe_toEquiv_symm, Basis.coe_ofEquivFun,
-    LinearEquiv.symm_mk, LinearMap.coe_mk, AddHom.coe_mk, LinearEquiv.coe_mk,
-    Equiv.addEquiv_symm_apply]
+    LinearEquiv.symm_mk, LinearMap.coe_mk, AddHom.coe_mk, LinearEquiv.coe_mk]
   change Pi.single i 1 j = _
   simp [Pi.single_apply]
 

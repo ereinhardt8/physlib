@@ -8,16 +8,12 @@ module
 public import Mathlib.Algebra.Module.Submodule.Lattice
 public import Mathlib.Analysis.Subadditive
 public import Mathlib.CategoryTheory.Functor.FullyFaithful
-public import Mathlib.CategoryTheory.Monoidal.Braided.Basic
 public import Mathlib.Data.EReal.Basic
 public import Mathlib.Tactic
 public import QuantumInfo.Entropy.VonNeumann
-public import QuantumInfo.Entropy.SSA
 public import QuantumInfo.Entropy.Relative
-public import QuantumInfo.Entropy.DPI
 public import QuantumInfo.Channels.Bundled
 public import QuantumInfo.Channels.CPTP
-public import QuantumInfo.Channels.Dual
 public import QuantumInfo.Channels.MatrixMap
 public import QuantumInfo.Channels.Unbundled
 
@@ -440,6 +436,7 @@ noncomputable def RelativeEntResource : MState (H i) → ℝ≥0 :=
 
 scoped notation "𝑅ᵣ" => RelativeEntResource
 
+set_option backward.isDefEq.respectTransparency false in
 theorem exists_isFree_relativeEntResource (ρ : MState (H i)) :
     ∃ σ ∈ IsFree, 𝐃(ρ‖σ) = 𝑅ᵣ ρ := by
   obtain ⟨σ, hσ₁, hσ₂⟩ := IsCompact_IsFree.exists_isMinOn_lowerSemicontinuousOn

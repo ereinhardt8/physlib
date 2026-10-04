@@ -38,7 +38,6 @@ lemma preContrMetricVal_expand_tmul {d : ℕ} : preContrMetricVal d =
   simp [Fintype.sum_sum_type, minkowskiMatrix.inl_0_inl_0, minkowskiMatrix.inr_i_inr_i,
     sub_eq_add_neg]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The metric `ηᵃᵃ` as a morphism `𝟙_ (Rep ℝ (LorentzGroup d)) ⟶ ContrMod.rep ⊗ ContrMod.rep`,
   making its invariance under the action of `LorentzGroup d`. -/
 def preContrMetric (d : ℕ := 3) :
@@ -81,7 +80,6 @@ lemma preCoMetricVal_expand_tmul {d : ℕ} : preCoMetricVal d =
   simp [Fintype.sum_sum_type, minkowskiMatrix.inl_0_inl_0, minkowskiMatrix.inr_i_inr_i,
     sub_eq_add_neg]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The metric `ηᵢᵢ` as a morphism `𝟙_ (Rep ℂ (LorentzGroup d))) ⟶ CoMod.rep ⊗ CoMod.rep`,
   making its invariance under the action of `LorentzGroup d`. -/
 def preCoMetric (d : ℕ := 3) : (Representation.trivial ℝ (LorentzGroup d) ℝ).IntertwiningMap
@@ -146,7 +144,7 @@ lemma contrCoContract_apply_metric {d : ℕ} :
         rw [Finset.sum_eq_single_of_mem x (Finset.mem_univ x)]
         · simp [minkowskiMatrix.η_apply_mul_η_apply_diag, contrCoContract_basis]
         · intro b _ hb
-          simp [contrCoContract_basis, if_neg (Ne.symm hb)]
+          simp [contrCoContract_basis, ite_eq_right (Ne.symm hb)]
   rw [preCoContrUnit_apply_one, preCoContrUnitVal_expand_tmul]
   simp [map_sum]
 
@@ -185,7 +183,7 @@ lemma coContrContract_apply_metric {d : ℕ} :
         rw [Finset.sum_eq_single_of_mem x (Finset.mem_univ x)]
         · simp [minkowskiMatrix.η_apply_mul_η_apply_diag, coContrContract_basis]
         · intro b _ hb
-          simp [coContrContract_basis, if_neg (Ne.symm hb)]
+          simp [coContrContract_basis, ite_eq_right (Ne.symm hb)]
   rw [preContrCoUnit_apply_one, preContrCoUnitVal_expand_tmul]
   simp [map_sum]
 

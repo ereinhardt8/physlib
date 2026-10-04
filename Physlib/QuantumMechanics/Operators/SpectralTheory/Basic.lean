@@ -18,8 +18,8 @@ which are of central importance in quantum mechanics.
 
 Definitions for subsets of ℂ associated to an operator `T : H →ₗ.[ℂ] H` vary by author.
 Here we adopt those used in
-[Konrad Schmüdgen, *Unbounded Self-Adjoint Operators on Hilbert Space*][Schmudgen2012],
-summarized in the following table:
+[Konrad Schmüdgen, Unbounded Self-Adjoint Operators on Hilbert Space][Schmudgen2012]
+[ref: Schmudgen2012], summarized in the following table:
 
 | Subset of ℂ | abbrev. | `D(T - z)` | `R(T - z)` | `(T - z)⁻¹` |
 | :---------- | :-----: | :--------: | :--------: | :---------: |
@@ -81,8 +81,7 @@ Main results
 
 ## iv. References
 
-- [Konrad Schmüdgen, *Unbounded Self-Adjoint Operators on Hilbert Space*][Schmudgen2012]
-
+* Konrad Schmüdgen, Unbounded Self-Adjoint Operators on Hilbert Space. [ref: Schmudgen2012]
 -/
 
 TODO "Move spectral theory definitions and lemmas over to Mathlib equivalents if/when available."
@@ -199,14 +198,16 @@ lemma mem_regularityDomain_iff {T : H →ₗ.[ℂ] H} {z : ℂ} :
     rw [inverse_domain] at hx
     obtain ⟨y, hy⟩ := hx
     specialize h_bound ⟨y, y.2.1⟩
-    simp_all [le_inv_mul_iff₀, sub_apply, inverse_apply_eq h_ker (y := ⟨x, hx⟩) hy]
+    simp_all [le_inv_mul_iff₀, sub_apply,
+      inverse_apply_eq (toFun_ker_eq_bot_iff.mp h_ker) (y := ⟨x, hx⟩) hy]
   · intro ⟨h_ker, h_cont⟩
     obtain ⟨c, hc, h_bound⟩ := LinearMap.continuous_iff_bounded.mp h_cont
     refine ⟨c⁻¹, inv_pos.mpr hc, fun x ↦ ?_⟩
     apply (inv_mul_le_iff₀ hc).mpr
     have hx : ↑x ∈ (T - z • 1).domain := by simp [sub_domain]
     specialize h_bound ⟨(T - z • 1) ⟨x, hx⟩, by simp [inverse_domain]⟩
-    simp only [toFun_eq_coe, inverse_apply_eq h_ker (x := ⟨x, hx⟩), coe_norm] at h_bound
+    simp only [toFun_eq_coe,
+      inverse_apply_eq (toFun_ker_eq_bot_iff.mp h_ker) (x := ⟨x, hx⟩), norm_coe] at h_bound
     simp_all [sub_apply]
 
 /-- The regularity domain of `T` contains open balls with radii controlled by the lower bounds. -/
@@ -324,7 +325,7 @@ lemma defectNumber_eq (T : H →ₗ.[ℂ] H) (z : ℂ) :
 lemma IsClosed.defectNumber_eq_zero_iff [CompleteSpace H]
     {T : H →ₗ.[ℂ] H} (hT : T.IsClosed) {z : ℂ} (hz : z ∈ T.regularityDomain) :
     T.defectNumber z = 0 ↔ (T - z • 1).toFun.range = ⊤ := by
-  haveI := hT.sub_range_isClosed hz -- needed for HasOrthogonalProjection
+  have := hT.sub_range_isClosed hz -- needed for HasOrthogonalProjection
   exact rank_eq_zero.trans orthogonal_eq_bot_iff
 
 /-- `T` and `T.closure` have the same defect number at points in their regularity domain. -/
@@ -355,7 +356,7 @@ lemma IsClosed.exists_inner_eq_zero_of_defectNumber_lt [CompleteSpace H]
     ∃ x : T.domain, x ≠ 0 ∧ ⟪T x - z₁ • x, T x - z₂ • x⟫_ℂ = 0 := by
   obtain ⟨y, h_inf, hy⟩ := (Submodule.ne_bot_iff _).mp (inf_ne_bot_of_rank_lt h)
   obtain ⟨hy₁, hy₂⟩ := mem_inf.mp h_inf
-  haveI := hT.sub_range_isClosed hz₁ -- needed for `orthogonal_orthogonal`
+  have := hT.sub_range_isClosed hz₁ -- needed for `orthogonal_orthogonal`
   simp only [deficiencySubspace_coe, orthogonal_orthogonal] at hy₁ hy₂
   obtain ⟨⟨x, hx⟩, hxy⟩ := hy₁
   refine ⟨⟨x, hx.1⟩, fun h ↦ hy ?_, ?_⟩
@@ -397,7 +398,7 @@ lemma IsClosable.defectNumber_const [CompleteSpace H]
     T.defectNumber z₁ = T.defectNumber z₂ := by
   by_cases hz₁ : z₁ ∈ T.regularityDomain
   · have h_joined : JoinedIn T.regularityDomain z₁ z₂ := by
-      haveI := T.regularityDomain_isOpen.locallyPathConnectedSpace
+      have := T.regularityDomain_isOpen.locallyPathConnectedSpace
       have hz₂ : z₂ ∈ T.regularityDomain := connectedComponentIn_subset _ _ hz
       apply (joinedIn_iff_joined hz₁ hz₂).mpr
       rw [← mem_pathComponent_iff, pathComponent_eq_connectedComponent]
@@ -593,13 +594,13 @@ theorem numericalRange_convex (T : H →ₗ.[ℂ] H) : Convex ℝ (Θ T) := by
     -- `g 0 = 0`, `g 1 = 1` and continuity ensure that all of `[0,1]` is also in `Θ S`.
     let g : ℝ → ℝ := fun t ↦ (t ^ 2 + (1 - t) * t * (⟪↑y₀, S y₂⟫_ℂ + ⟪↑y₂, S y₀⟫_ℂ).re) / ‖f t‖ ^ 2
     have hg₀ : g 0 = 0 := by simp [g]
-    have hg₁ : g 1 = 1 := by simp [g, f, coe_norm y₂ ▸ hy₂]
+    have hg₁ : g 1 = 1 := by simp [g, f, (norm_coe y₂).symm ▸ hy₂]
     have hg_cont : Continuous g := Continuous.div₀ (by fun_prop) (by fun_prop) (by simp [hf])
     intro c ⟨t, ht, htc⟩
     obtain ⟨r, hr, hrt⟩ := (hg₀ ▸ hg₁ ▸ intermediate_value_Icc zero_le_one hg_cont.continuousOn) ht
     rw [← htc, ← hrt]
     refine ⟨‖f r‖⁻¹ • f r, ?_, ?_⟩
-    · simp only [mem_setOf_eq, norm_smul, norm_inv, norm_norm]
+    · simp only [Set.mem_ofPred_eq, norm_smul, norm_inv, norm_norm]
       exact inv_mul_cancel₀ (norm_ne_zero_iff.mpr (hf r))
     · have hf_sq : ofReal (‖f r‖ ^ 2) ≠ 0 := by simp [hf]
       simp_rw [← Complex.coe_smul, map_smul, SetLike.val_smul, inner_smul_left,inner_smul_right,
@@ -647,7 +648,7 @@ lemma resolventSet_eq_empty [CompleteSpace H] {T : H →ₗ.[ℂ] H} (h : ¬T.Is
     have hTz : T - z • 1 + z • 1 = T :=
       eq_of_le_of_domain_eq (sub_add_le_cancel _ _) (by simp [add_domain, sub_domain])
     exact h <| hTz ▸ this.add_continuous (Continuous.const_smul (by fun_prop) _) (by simp)
-  apply (inverse_closed_iff h_ker).mp
+  apply (inverse_closed_iff (toFun_ker_eq_bot_iff.mp h_ker)).mp
   apply (isClosed_iff_isClosed_domain_of_continuous h_cont).mpr
   simp [inverse_domain, h_range]
 
@@ -659,10 +660,10 @@ lemma resolventSet_subset_regularityDomain (T : H →ₗ.[ℂ] H) : ρ T ⊆ T.r
 lemma IsClosed.resolventSet_eq [CompleteSpace H] {T : H →ₗ.[ℂ] H} (hT : T.IsClosed) :
     ρ T = {z : ℂ | (T - z • 1).toFun.ker = ⊥ ∧ (T - z • 1).toFun.range = ⊤} := by
   ext z
-  rw [mem_resolventSet_iff, mem_setOf_eq, and_congr_right_iff, and_iff_left_iff_imp]
+  rw [mem_resolventSet_iff, Set.mem_ofPred_eq, and_congr_right_iff, and_iff_left_iff_imp]
   intro h_ker h_range
   refine continuous_of_isClosed_domain ?_ ?_
-  · apply (inverse_closed_iff h_ker).mpr
+  · apply (inverse_closed_iff (toFun_ker_eq_bot_iff.mp h_ker)).mpr
     exact hT.sub_continuous (Continuous.const_smul (by fun_prop) _) (by simp)
   · simp [inverse_domain, h_range]
 
@@ -804,7 +805,7 @@ lemma IsClosed.spectrum_eq [CompleteSpace H] {T : H →ₗ.[ℂ] H} (hT : T.IsCl
         rw [mem_continuousSpectrum_iff, ← inverse_domain]
         refine fun h ↦ h_cont ?_
         refine continuous_of_isClosed_domain ?_ h
-        apply (inverse_closed_iff h_ker).mpr
+        apply (inverse_closed_iff (toFun_ker_eq_bot_iff.mp h_ker)).mpr
         exact hT.sub_continuous (Continuous.const_smul (by fun_prop) _) le_top
     · left; left; exact h_ker
   · refine union_subset ?_ T.continuousSpectrum_subset_spectrum
@@ -843,7 +844,8 @@ lemma resolvent_sub
       ext x
       · suffices 𝑅 T₂ z ⟨x, by simp [inverse_domain, hz₂.2]⟩ ∈ T₁.domain by
           simp [sub_domain, mem_compRestricted_domain_iff, inverse_domain, hz₁.2, hz₂.2, this]
-        have hR₂ : (𝑅 T₂ z).toFun.range = T₂.domain := by simp [inverse_range hz₂.1, sub_domain]
+        have hR₂ : (𝑅 T₂ z).toFun.range = T₂.domain := by
+          simp [inverse_range (toFun_ker_eq_bot_iff.mp hz₂.1), sub_domain]
         exact hT (hR₂ ▸ mem_range_self _)
       · rfl
 
@@ -875,7 +877,8 @@ lemma resolvent_sub' {T : H →ₗ.[ℂ] H} (z₁ z₂ : ℂ) (hz₁ : z₁ ∈ 
       _ = (z₁ - z₂) • 𝑅 S z₁ := by
         congr
         ext
-        · simp [mem_compRestricted_domain_iff, ← inverse_range hz₁'.1]
+        · simp [mem_compRestricted_domain_iff,
+            ← inverse_range (toFun_ker_eq_bot_iff.mp hz₁'.1)]
         · rfl
 
 end

@@ -6,7 +6,7 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Particles.StandardModel.Basic
-public import Physlib.Relativity.Tensors.ComplexTensor.Basic
+public import Physlib.Relativity.Fermions.Weyl.RightHanded
 /-!
 # Up-type singlets
 
@@ -53,7 +53,7 @@ The AddCommGroup and module instances are inherited from the underlying tensor p
 
 instance : AddCommGroup UpSinglet := Equiv.addCommGroup valEquiv
 
-instance : Module ℂ UpSinglet := Equiv.module ℂ valEquiv
+instance : Module ℂ UpSinglet := AddEquiv.module ℂ { valEquiv with map_add' _ _ := rfl }
 
 /-- The linear equivalence between `UpSinglet` and its underlying tensor product space. -/
 def valLinEquiv : UpSinglet ≃ₗ[ℂ]

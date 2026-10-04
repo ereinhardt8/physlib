@@ -54,6 +54,7 @@ lemma transpose_mem_rotations {d} (Λ : LorentzGroup d) :
     transpose Λ ∈ Rotations d ↔ Λ ∈ Rotations d := by
   simp [mem_rotations_iff, LorentzGroup.transpose_val, IsProper]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The group homomorphism from the special orthogonal group to the Lorentz group. -/
 def ofSpecialOrthogonal {d} :
     Matrix.specialOrthogonalGroup (Fin d) ℝ ≃* Rotations d where

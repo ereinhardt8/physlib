@@ -21,7 +21,9 @@ namespace HarmonicOscillator
 
 variable (Q : HarmonicOscillator)
 
-open Nat Polynomial HilbertSpace Constants
+open Nat Polynomial
+open _root_.QuantumMechanics.OneDimension.HilbertSpace
+open Constants
 
 /-- The `n`th eigenvalues for a Harmonic oscillator is defined as `(n + 1/2) * ℏ * ω`. -/
 noncomputable def eigenValue (n : ℕ) : ℝ := (n + 1/2) * ℏ * Q.ω
@@ -128,7 +130,7 @@ lemma deriv_deriv_eigenfunction_succ (n : ℕ) (x : ℝ) :
   simp only [ofNat_nonneg, pow_nonneg, Real.sqrt_mul, one_div, mul_inv_rev, Complex.ofReal_mul,
     Complex.ofReal_inv, smul_eq_mul, deriv_const_mul_field', neg_mul, mul_eq_mul_left_iff,
     _root_.mul_eq_zero, inv_eq_zero, Complex.ofReal_eq_zero, cast_nonneg, Real.sqrt_eq_zero,
-    cast_eq_zero, ne_eq, AddLeftCancelMonoid.add_eq_zero, one_ne_zero, and_false, not_false_eq_true,
+    cast_eq_zero, ne_eq, Nat.add_eq_zero_iff, one_ne_zero, and_false, not_false_eq_true,
     pow_eq_zero_iff, OfNat.ofNat_ne_zero, or_false, ξ_ne_zero]
   left
   rw [deriv_fun_mul (by fun_prop) (by fun_prop)]

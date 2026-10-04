@@ -8,17 +8,11 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Log.Base
 
 public import QuantumInfo.Entropy.VonNeumann
-public import QuantumInfo.Entropy.SSA
-public import QuantumInfo.Entropy.Relative
-public import QuantumInfo.Entropy.DPI
 public import QuantumInfo.Channels.Bundled
 public import QuantumInfo.Channels.CPTP
-public import QuantumInfo.Channels.Dual
 public import QuantumInfo.Channels.MatrixMap
 public import QuantumInfo.Channels.Unbundled
 public import QuantumInfo.States.Mixed.Fidelity
-public import QuantumInfo.States.Mixed.TraceDistance
-public import Physlib.Meta.Sorry
 
 /-!
 # Quantum Capacity
@@ -95,8 +89,7 @@ And other important theorems like superdense coding, nonadditivity, superactivat
 
 ## iv. References
 
- * [Watrous's notes](https://cs.uwaterloo.ca/~watrous/TQI/TQI.8.pdf), Chapter 8 of
-   *The Theory of Quantum Information*.
+* Watrous's notes, Chapter 8 of The Theory of Quantum Information. [ref: watrous_tqi_ch8]
 -/
 
 @[expose] public section

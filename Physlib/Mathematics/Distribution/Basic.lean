@@ -476,8 +476,10 @@ private lemma lipschitzWith_integral_of_le {μ ρ : Measure E} (hμρ : μ ≤ �
         MeasureTheory.norm_integral_le_lintegral_norm (μ := μ) (fun x => f x - g x)
     _ ≤ (eLpNorm (fun x => f x - g x) 1 ρ).toReal := by
       refine ENNReal.toReal_mono hfg_top ?_
-      simpa [eLpNorm_one_eq_lintegral_enorm] using
-        eLpNorm_mono_measure (p := (1 : ℝ≥0∞)) (fun x => f x - g x) hμρ
+      have hfg_meas : AEStronglyMeasurable (fun x => f x - g x) μ :=
+        (hfμ.sub hgμ).aestronglyMeasurable
+      rw [← eLpNorm_one_eq_lintegral_enorm hfg_meas]
+      exact eLpNorm_mono_measure (p := (1 : ℝ≥0∞)) (fun x => f x - g x) hμρ
     _ = ‖f - g‖ := by rw [Lp.norm_def, eLpNorm_congr_ae hfg_ae]
 
 private lemma integral_boundedContinuous_eq_of_forall_schwartz_integral_eq
@@ -486,8 +488,8 @@ private lemma integral_boundedContinuous_eq_of_forall_schwartz_integral_eq
     (f : BoundedContinuousFunction E ℂ) :
     ∫ x, f x ∂μ = ∫ x, f x ∂ν := by
   let ρ : Measure E := μ + ν
-  haveI : IsFiniteMeasure ρ := inferInstance
-  haveI : ρ.HasTemperateGrowth := inferInstance
+  have : IsFiniteMeasure ρ := inferInstance
+  have : ρ.HasTemperateGrowth := inferInstance
   let L : 𝓢(E, ℂ) →L[ℝ] Lp ℂ 1 ρ :=
     SchwartzMap.toLpCLM ℝ ℂ 1 ρ
   let toL1 : BoundedContinuousFunction E ℂ →L[ℝ] Lp ℂ 1 ρ :=
@@ -624,7 +626,7 @@ def heavisideStep (d : ℕ) : (EuclideanSpace ℝ (Fin d.succ)) →d[ℝ] ℝ :=
   · intro a η
     simp only [smul_apply, RingHom.id_apply]
     rw [MeasureTheory.integral_smul]
-  haveI hμ : (volume (α := EuclideanSpace ℝ (Fin d.succ))).HasTemperateGrowth := by
+  have hμ : (volume (α := EuclideanSpace ℝ (Fin d.succ))).HasTemperateGrowth := by
     infer_instance
   rcases hμ.exists_integrable with ⟨n, h⟩
   let m := (n, 0)

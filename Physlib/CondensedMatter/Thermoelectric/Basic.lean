@@ -5,7 +5,7 @@ Authors: Giuseppe Barbalinardo
 -/
 module
 
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 public import Mathlib.Tactic.Ring
 public import Mathlib.Tactic.Positivity
 /-!
@@ -68,11 +68,10 @@ units, following the convention of `Physlib.Thermodynamics.IdealGas.Basic`.
 
 ## iv. References
 
-- Ioffe, A.F., *Semiconductor Thermoelements and Thermoelectric Cooling*,
-  Infosearch (1957).
-- Snyder, G.J., Toberer, E.S., *Complex thermoelectric materials*,
-  Nature Materials 7, 105–114 (2008).
-
+* Ioffe, A.F., Semiconductor Thermoelements and Thermoelectric Cooling, Infosearch (1957).
+  [ref: ioffe_1957]
+* Snyder, G.J., Toberer, E.S., Complex thermoelectric materials, Nature Materials 7, 105–114
+  (2008). [ref: snyder_toberer_2008]
 -/
 
 @[expose] public section

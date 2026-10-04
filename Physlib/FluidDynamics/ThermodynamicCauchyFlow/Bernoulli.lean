@@ -5,7 +5,6 @@ Authors: Florian Wiesner, Michał Mogielnicki
 -/
 module
 
-public import Physlib.FluidDynamics.CauchyFlow.BodyForce
 public import Physlib.FluidDynamics.FluidFlow.Kinematics
 public import Physlib.FluidDynamics.ThermodynamicCauchyFlow.Basic
 /-!
@@ -31,6 +30,7 @@ than defining a separate Bernoulli-flow structure.
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section

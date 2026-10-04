@@ -32,7 +32,9 @@ variable (Q : HarmonicOscillator)
 
 open Module Nat
 open Polynomial
-open MeasureTheory HilbertSpace InnerProductSpace
+open MeasureTheory
+open _root_.QuantumMechanics.OneDimension.HilbertSpace
+open InnerProductSpace
 
 /-
 
@@ -359,6 +361,7 @@ lemma orthogonal_exp_of_mem_orthogonal (f : ℝ → ℂ) (hf : MemHS f)
 open FourierTransform MeasureTheory Real Lp MemLp Filter Complex Topology
   ComplexInnerProductSpace ComplexConjugate
 
+set_option backward.isDefEq.respectTransparency false in
 /-- If `f` is a function `ℝ → ℂ` satisfying `MemHS f` such that it is orthogonal
   to all `eigenfunction n` then the fourier transform of
 
@@ -413,15 +416,11 @@ lemma zero_of_orthogonal_mk (f : ℝ → ℂ) (hf : MemHS f)
   refine (norm_eq_zero_iff (by simp)).mp ?_
   simp only [Norm.norm, eLpNorm_mk]
   have h2 : eLpNorm f 2 volume = 0 := by
-    rw [MeasureTheory.eLpNorm_eq_zero_iff] at h1 ⊢
+    rw [MeasureTheory.eLpNorm_eq_zero_iff (by simp)] at h1 ⊢
     rw [Filter.eventuallyEq_iff_all_subsets] at h1 ⊢
     simp only [ofReal_exp, ofReal_div, ofReal_neg, ofReal_mul, ofReal_pow, ofReal_ofNat,
       Pi.zero_apply, _root_.mul_eq_zero, Complex.exp_ne_zero, or_false] at h1
     exact h1
-    exact aeStronglyMeasurable_of_memHS hf
-    simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
-    · exact hInt.aestronglyMeasurable
-    · simp
   rw [h2]
   simp
 

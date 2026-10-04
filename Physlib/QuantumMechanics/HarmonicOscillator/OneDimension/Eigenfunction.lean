@@ -11,6 +11,9 @@ public import Physlib.Mathematics.SpecialFunctions.PhysHermite
 
 # Eigenfunction of the Harmonic Oscillator
 
+Note: These eigenfunctions have been generalized to `d` dimensions in
+`QuantumMechanics/HarmonicOscillator/Eigenstates.lean`.
+
 -/
 
 @[expose] public section
@@ -22,7 +25,9 @@ namespace HarmonicOscillator
 
 variable (Q : HarmonicOscillator)
 
-open Nat Polynomial HilbertSpace MeasureTheory Constants
+open Nat Polynomial
+open _root_.QuantumMechanics.OneDimension.HilbertSpace
+open MeasureTheory Constants
 
 /-- The `n`th eigenfunction of the Harmonic oscillator is defined as the function `ℝ → ℂ`
   taking `x : ℝ` to

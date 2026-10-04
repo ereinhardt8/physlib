@@ -11,7 +11,6 @@ public import Mathlib.Analysis.CStarAlgebra.Matrix
 public import Mathlib.Analysis.Matrix.Order
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
-public import Mathlib.Data.Multiset.Functor --Can't believe I'm having to import this
 public import Mathlib.LinearAlgebra.Matrix.Kronecker
 public import Mathlib.LinearAlgebra.Matrix.PosDef
 public import Mathlib.LinearAlgebra.Matrix.IsDiag
@@ -43,6 +42,7 @@ theorem fromBlocks_gram_posSemidef {m n k : Type*} [Fintype m] [Fintype n] [Fint
   rw [fromBlocks_conjTranspose, fromBlocks_multiply]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
 theorem zero_rank_eq_zero {A : Matrix n n 𝕜} [Fintype n] (hA : A.rank = 0) : A = 0 := by
   have h : ∀ v, A.mulVecLin v = 0 := by
     intro v
@@ -76,10 +76,10 @@ theorem smul_real (c : ℝ) : (c • A).IsHermitian := by
 
 def HermitianSubspace (n 𝕜 : Type*) [Fintype n] [RCLike 𝕜] : Subspace ℝ (Matrix n n 𝕜) where
   carrier := { A : Matrix n n 𝕜 | A.IsHermitian }
-  add_mem' _ _ := by simp_all only [Set.mem_setOf_eq, IsHermitian.add]
-  zero_mem' := by simp only [Set.mem_setOf_eq, isHermitian_zero]
+  add_mem' _ _ := by simp_all only [Set.mem_ofPred_eq, IsHermitian.add]
+  zero_mem' := by simp only [Set.mem_ofPred_eq, isHermitian_zero]
   smul_mem' c A := by
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     intro hA
     exact IsHermitian.smul_real hA c
 
@@ -210,7 +210,7 @@ theorem stdBasisMatrix_iff_eq (i j : m) {c : 𝕜} (hc : 0 < c) : (single i j c)
   · intro ⟨hherm, _⟩
     rw [IsHermitian, ← ext_iff] at hherm
     replace hherm := hherm i j
-    simp only [single, conjTranspose_apply, of_apply, true_and, RCLike.star_def, if_true] at hherm
+    simp only [single, conjTranspose_apply, of_apply, true_and, RCLike.star_def, ite_true] at hherm
     apply_fun (starRingEnd 𝕜) at hherm
     have hcstar := RCLike.conj_eq_iff_im.mpr (RCLike.pos_iff.mp hc).right
     rw [starRingEnd_self_apply, hcstar, ite_eq_left_iff] at hherm
@@ -242,7 +242,7 @@ theorem stdBasisMatrix_iff_eq (i j : m) {c : 𝕜} (hc : 0 < c) : (single i j c)
             by_contra hz'
             apply hz
             exact ⟨hz'.left.symm, hz'.right.symm⟩
-          rw [ite_cond_eq_false _ _ (eq_false h₁)]
+          rw [ite_eq_right_of_eq_false _ _ (eq_false h₁)]
           ring
         rw [Fintype.sum_eq_single ⟨i, i⟩]
         · simp [mul_assoc]
@@ -285,7 +285,7 @@ theorem zero_dotProduct_zero_iff : (∀ x : m → 𝕜, 0 = star x ⬝ᵥ A.mulV
   constructor
   · intro h
     ext i j
-    have h₂ := fun x ↦ (PosSemidef.dotProduct_mulVec_zero_iff hA x).mp (h x).symm
+    have h₂ := fun x ↦ (PosSemidef.dotProduct_mulVec_zero_iff hA (x := x)).mp (h x).symm
     classical have : DecidableEq m := inferInstance
     convert! congrFun (h₂ (Pi.single j 1)) i using 1
     simp
@@ -662,7 +662,8 @@ theorem PosSemidef.traceLeft [DecidableEq d₁] (hA : A.PosSemidef) : A.traceLef
   constructor
   · exact hA.1.traceLeft
   · intro x
-    convert Finset.sum_nonneg' (s := .univ) (fun (i : d₁) ↦ hA.2 (fun (j,k) ↦ if i = j then x k else 0))
+    convert Finset.sum_nonneg (s := .univ)
+      (fun (i : d₁) _ ↦ hA.2 (fun (j,k) ↦ if i = j then x k else 0))
     simp_rw [Matrix.traceLeft, dotProduct_mulVec]
     simpa [dotProduct, vecMul_eq_sum, ite_apply, Fintype.sum_prod_type, Finset.mul_sum, Finset.sum_mul,
       apply_ite] using Finset.sum_comm_cycle
@@ -672,7 +673,8 @@ theorem PosSemidef.traceRight [DecidableEq d₂] (hA : A.PosSemidef) : A.traceRi
   constructor
   · exact hA.1.traceRight
   · intro x
-    convert Finset.sum_nonneg' (s := .univ) (fun (i : d₂) ↦ hA.2 (fun (j,k) ↦ if i = k then x j else 0))
+    convert Finset.sum_nonneg (s := .univ)
+      (fun (i : d₂) _ ↦ hA.2 (fun (j,k) ↦ if i = k then x j else 0))
     simp_rw [Matrix.traceRight, dotProduct_mulVec]
     simpa [dotProduct, vecMul_eq_sum, ite_apply, Fintype.sum_prod_type, Finset.mul_sum, Finset.sum_mul,
       apply_ite] using Finset.sum_comm_cycle
@@ -719,7 +721,8 @@ theorem PosSemidef.rsmul {n : Type*} [Fintype n] {M : Matrix n n ℂ} (hM : M.Po
   rw [Matrix.posSemidef_iff_dotProduct_mulVec] at hM ⊢
   constructor
   · exact hM.1.smul_real c
-  · peel hM.2
+  · intro x
+    have := hM.2 x
     rw [smul_mulVec, dotProduct_smul]
     positivity
 
@@ -863,7 +866,7 @@ theorem cfc_diagonal (g : d → ℝ) (f : ℝ → ℝ) :
       change Matrix.conjTranspose _ = _
       simp [Matrix.conjTranspose]
   --TODO cfc_cont_tac
-  rw [cfc, dif_pos ⟨h_self_adjoint, continuousOn_iff_continuous_restrict.mpr <| by fun_prop⟩]
+  rw [cfc, dite_eq_left ⟨h_self_adjoint, continuousOn_iff_continuous_domRestrict.mpr <| by fun_prop⟩]
   rw [cfcHom_eq_of_continuous_of_map_id]
   rotate_left
   · refine' { .. }

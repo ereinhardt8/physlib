@@ -5,23 +5,17 @@ Authors: Alex Meiburg
 -/
 module
 
-public import Mathlib.LinearAlgebra.TensorProduct.Matrix
 public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
 public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
 public import Mathlib.Data.Set.Card
 public import Mathlib.Algebra.Module.LinearMap.Basic
 public import QuantumInfo.ForMathlib.ContinuousLinearMap
-public import QuantumInfo.ForMathlib.ComplexLaplaceTransform
-public import QuantumInfo.ForMathlib.ContinuousSup
-public import QuantumInfo.ForMathlib.Filter
 public import QuantumInfo.ForMathlib.HermitianMat
 public import QuantumInfo.ForMathlib.Isometry
 public import QuantumInfo.ForMathlib.LinearEquiv
 public import QuantumInfo.ForMathlib.MatrixNorm.TraceNorm
 public import QuantumInfo.ForMathlib.Matrix
-public import QuantumInfo.ForMathlib.Minimax
 public import QuantumInfo.ForMathlib.Misc
-public import QuantumInfo.ForMathlib.Unitary
 public import QuantumInfo.States.Pure.Braket
 public import QuantumInfo.States.Mixed.MState
 
@@ -64,6 +58,7 @@ def id : MatrixMap A A R := LinearMap.id
 def choi_matrix (M : MatrixMap A B R) : Matrix (B × A) (B × A) R :=
   fun (j₁,i₁) (j₂,i₂) ↦ M (Matrix.single i₁ i₂ 1) j₁ j₂
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Given the Choi matrix, generate the corresponding R-linear map between matrices as a
 MatrixMap. This is the inverse of `MatrixMap.choi_matrix`. -/
 def of_choi_matrix (M : Matrix (B × A) (B × A) R) : MatrixMap A B R where
@@ -73,12 +68,14 @@ def of_choi_matrix (M : Matrix (B × A) (B × A) R) : MatrixMap A B R where
     funext b₁ b₂
     simp only [Matrix.smul_apply, smul_eq_mul, RingHom.id_apply, Finset.mul_sum, mul_assoc]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Proves that `MatrixMap.of_choi_matrix` and `MatrixMap.choi_matrix` inverses. -/
 @[simp]
 theorem map_choi_inv (M : Matrix (B × A) (B × A) R) : choi_matrix (of_choi_matrix M) = M := by
   ext ⟨i₁,i₂⟩ ⟨j₁,j₂⟩
   simp [of_choi_matrix, choi_matrix, Matrix.single, ite_and]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Proves that `MatrixMap.choi_matrix` and `MatrixMap.of_choi_matrix` inverses. -/
 @[simp]
 theorem choi_map_inv (M : MatrixMap A B R) : of_choi_matrix (choi_matrix M) = M := by
@@ -251,7 +248,8 @@ theorem kron_def [CommSemiring R] (M₁ : MatrixMap A B R) (M₂ : MatrixMap C D
     Module.Basis.tensorProduct_apply, Module.Basis.map_apply, Module.Basis.coe_reindex, Function.comp_apply,
     Equiv.sigmaEquivProd_symm_apply, Pi.basis_apply, Pi.basisFun_apply, Matrix.coe_ofLinearEquiv, TensorProduct.map_tmul,
     Module.Basis.tensorProduct_repr_tmul_apply, Module.Basis.map_repr, LinearEquiv.trans_apply, Matrix.coe_ofLinearEquiv_symm,
-    Module.Basis.repr_reindex, Finsupp.mapDomain_equiv_apply, Pi.basis_repr, Pi.basisFun_repr, Matrix.of_symm_apply, smul_eq_mul,
+    Module.Basis.repr_reindex, Finsupp.equivMapDomain_apply,
+    Pi.basis_repr, Pi.basisFun_repr, Matrix.of_symm_apply, smul_eq_mul,
     Matrix.of_symm_single, Pi.single_apply, Matrix.smul_of, Matrix.sum_apply, Matrix.of_apply, Pi.smul_apply]
   rw [ Finset.sum_eq_single ( ( b₁, d₁ ), ( b₂, d₂ ) ) ]
   · rw [ Finset.sum_eq_single ( ( a₁, c₁ ), ( a₂, c₂ ) ) ]

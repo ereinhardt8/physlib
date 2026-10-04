@@ -10,6 +10,8 @@ public import QuantumInfo.ForMathlib.HermitianMat.Jordan
 public import QuantumInfo.ForMathlib.LimSupInf
 public import QuantumInfo.ResourceTheory.FreeState
 public import QuantumInfo.ResourceTheory.HypothesisTesting
+public import QuantumInfo.ForMathlib.Filter
+public import Mathlib.Topology.Algebra.Order.LiminfLimsup
 
 @[expose] public section
 
@@ -37,6 +39,7 @@ theorem Lemma6_σn_IsFree {σ₁ : MState (H i)} {σₘ : (m : ℕ) → MState (
     · exact hσ₁_free.npow (n % m)
   · rw [← pow_mul, ← spacePow_add, Nat.div_add_mod n m]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Lemma 6 from the paper.
 We _did_ end up doing the version that "works also in the case of ε = 0", which is nice.
 -/
@@ -245,7 +248,7 @@ theorem LemmaS2liminf {ε3 : Prob} {ε4 : ℝ≥0} (hε4 : 0 < ε4)
     · replace hf := le_trans hf hRinf
       replace hf := tsub_eq_zero_iff_le.mpr hf
       simp_all
-    apply Filter.IsCobounded.of_frequently_le (u := ⊤)
+    apply Filter.IsCobounded.of_frequently_le (l := ⊤)
     simp [Filter.frequently_atTop]
     intro n; use n
   apply Filter.isBoundedUnder_of
@@ -392,7 +395,6 @@ private theorem LemmaS3_sup {ε : Prob}
   --the (f n) / n term will go to zero.
   trans Filter.atTop.limsup fun n ↦ (—log β_ ε(ρ n‖{σ₂ n}) + f n) / n
   · refine Filter.limsup_le_limsup (.of_forall ?_)
-    dsimp
     intro x
     grw [LemmaS3_helper _ _ _ _ hσ]
   · apply le_of_eq
@@ -1366,7 +1368,7 @@ private theorem EquationS62
           congrArg HermitianMat.mat (congrFun (congrFun Esum ε2) n)
         conv =>
           enter [1]
-          rw [dif_pos zero_lt_one]
+          rw [dite_eq_left zero_lt_one]
           enter [1, 1, 1]
           rw [HermitianMat.inner_def]
           rw [← hMulOne]
@@ -1768,7 +1770,7 @@ theorem Lemma7 (ρ : MState (H i)) {ε : Prob} (hε : 0 < ε ∧ ε < 1) (σ : (
   --Before proceeding, let's reduce to the case that they're finite.
   have hR1 : R1 ρ ε ≠ ⊤ := hR1R2.ne_top
   rcases eq_or_ne (R2 ρ σ) ⊤ with hR2|hR2
-  · rw [hR2, ENNReal.top_sub hR1, ENNReal.mul_top', if_neg]
+  · rw [hR2, ENNReal.top_sub hR1, ENNReal.mul_top', ite_eq_right]
     · simp
     · have : ε'.val < 1 := hε'₂.trans hε.2
       rcases ε' with ⟨ε', hε'₁, hε'₂⟩

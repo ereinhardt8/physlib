@@ -6,8 +6,6 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.SpaceAndTime.TimeAndSpace.ConstantTimeDist
-public import Physlib.Mathematics.VariationalCalculus.HasVarAdjDeriv
-public import Physlib.SpaceAndTime.Space.DistOfFunction
 public import Physlib.SpaceAndTime.SpaceTime.TimeSlice
 
 /-!
@@ -36,9 +34,8 @@ spacetime to contravariant Lorentz vectors.
 
 ## iv. References
 
-- https://quantummechanics.ucsd.edu/ph130a/130_notes/node452.html
-- https://ph.qmul.ac.uk/sites/default/files/EMT10new.pdf
-
+* https://quantummechanics.ucsd.edu/ph130a/130_notes/node452.html. [ref: ucsd_ph130a_node452]
+* https://ph.qmul.ac.uk/sites/default/files/EMT10new.pdf. [ref: qmul_emt10_notes]
 -/
 
 @[expose] public section
@@ -190,8 +187,7 @@ lemma toTensor_distTensorDeriv_basis_repr_apply {d} (A : DistElectromagneticPote
     distDeriv (b 0) A ε (b 1) := by
   rw [Tensorial.basis_toTensor_apply]
   rw [Tensorial.basis_map_prod]
-  simp only [Nat.reduceSucc, Nat.reduceAdd, Basis.repr_reindex, Finsupp.mapDomain_equiv_apply,
-    Equiv.symm_symm, Fin.isValue]
+  simp only [Nat.reduceSucc, Nat.reduceAdd, Basis.repr_reindex, Fin.isValue]
   rw [Lorentz.Vector.tensor_basis_map_eq_basis_reindex,
     Lorentz.CoVector.tensor_basis_map_eq_basis_reindex]
   have hb : (((Lorentz.CoVector.basis (d := d)).reindex
@@ -204,7 +200,8 @@ lemma toTensor_distTensorDeriv_basis_repr_apply {d} (A : DistElectromagneticPote
     | ⟨i, j⟩ =>
     simp
   rw [hb]
-  rw [Module.Basis.repr_reindex_apply, distTensorDeriv_basis_repr_apply]
+  rw [Finsupp.equivMapDomain_apply, Module.Basis.repr_reindex_apply,
+    distTensorDeriv_basis_repr_apply]
   rfl
 
 end DistElectromagneticPotential

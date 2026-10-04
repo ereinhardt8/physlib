@@ -6,6 +6,7 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.Special.ProperTime
+public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.CausallyFollows
 /-!
 # Twin Paradox
 
@@ -65,13 +66,70 @@ def properTimeTwinB : ℝ := SpaceTime.properTime T.startPoint T.twinBMid +
 /-- The proper time of twin A minus the proper time of twin B. -/
 def ageGap : ℝ := T.properTimeTwinA - T.properTimeTwinB
 
-TODO "Find the conditions for which the age gap for the twin paradox is zero."
+/-- The age gap in terms of the two legs of Twin B, `u = twinBMid - startPoint` and
+  `v = endPoint - twinBMid`: `ageGap = √⟪u + v, u + v⟫ₘ - (√⟪u, u⟫ₘ + √⟪v, v⟫ₘ)`. -/
+lemma ageGap_eq :
+    T.ageGap = √⟪(T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid),
+      (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid)⟫ₘ
+      - (√⟪T.twinBMid - T.startPoint, T.twinBMid - T.startPoint⟫ₘ
+        + √⟪T.endPoint - T.twinBMid, T.endPoint - T.twinBMid⟫ₘ) := by
+  have hsum : T.endPoint - T.startPoint
+      = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
+  unfold ageGap properTimeTwinA properTimeTwinB properTime
+  rw [hsum]
 
-/-- In the twin paradox with instantaneous acceleration, Twin A is always older
-  then Twin B. -/
-informal_lemma ageGap_nonneg where
-  deps := [``ageGap]
-  tag := "7ROVE"
+/-- The age gap vanishes if and only if the turning point of Twin B lies on the straight
+  worldline of Twin A between the start and end points: Twin B does not turn. This is the
+  equality case of the reverse triangle inequality (`sqrt_add_eq_iff_of_causallyFollows`,
+  `minkowskiProduct_eq_iff_of_causallyFollows`).
+  -/
+lemma ageGap_eq_zero_iff : T.ageGap = 0 ↔
+    ∃ μ ∈ Set.Icc (0 : ℝ) 1, T.twinBMid = T.startPoint + μ • (T.endPoint - T.startPoint) := by
+  have hu := causallyFollows_zero_sub T.twinBMid_causallyFollows_startPoint
+  have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
+  have hsum : T.endPoint - T.startPoint
+      = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
+  rw [ageGap_eq, sub_eq_zero, sqrt_add_eq_iff_of_causallyFollows hu hv,
+    minkowskiProduct_eq_iff_of_causallyFollows hu hv]
+  constructor
+  · rintro ⟨l, hl, h | h⟩
+    · refine ⟨1 / (1 + l), ⟨by positivity, ?_⟩, ?_⟩
+      · rw [div_le_one (by linarith)]
+        linarith
+      · have hw : T.endPoint - T.startPoint = (1 + l) • (T.twinBMid - T.startPoint) := by
+          rw [hsum, h, _root_.add_smul, _root_.one_smul]
+        rw [hw, _root_.smul_smul, show 1 / (1 + l) * (1 + l) = 1 by field_simp, _root_.one_smul]
+        abel
+    · refine ⟨l / (1 + l), ⟨by positivity, ?_⟩, ?_⟩
+      · rw [div_le_one (by linarith)]
+        linarith
+      · have hw : T.endPoint - T.startPoint = (1 + l) • (T.endPoint - T.twinBMid) := by
+          rw [hsum, h, _root_.add_smul, _root_.one_smul]
+          abel
+        rw [hw, _root_.smul_smul, show l / (1 + l) * (1 + l) = l by field_simp, ← h]
+        abel
+  · rintro ⟨μ, ⟨h0, h1⟩, hmid⟩
+    have hu' : T.twinBMid - T.startPoint = μ • (T.endPoint - T.startPoint) := by
+      rw [hmid]
+      abel
+    have hv' : T.endPoint - T.twinBMid = (1 - μ) • (T.endPoint - T.startPoint) := by
+      rw [hmid, _root_.sub_smul, _root_.one_smul]
+      abel
+    by_cases hμ : μ = 0
+    · refine ⟨0, le_rfl, Or.inr ?_⟩
+      rw [hu', hμ, _root_.zero_smul, _root_.zero_smul]
+    · refine ⟨(1 - μ) / μ, div_nonneg (by linarith) (lt_of_le_of_ne h0 (Ne.symm hμ)).le, Or.inl ?_⟩
+      rw [hu', hv', _root_.smul_smul, show (1 - μ) / μ * μ = 1 - μ by field_simp]
+
+/-- In the twin paradox with instantaneous acceleration, Twin A is always at least as old as
+  Twin B: the age gap is nonnegative. This is the reverse triangle inequality of Minkowski space
+  (`sqrt_add_sqrt_le_sqrt_add_of_causallyFollows`) applied to the two legs of Twin B. -/
+lemma ageGap_nonneg : 0 ≤ T.ageGap := by
+  have hu := causallyFollows_zero_sub T.twinBMid_causallyFollows_startPoint
+  have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
+  have h := sqrt_add_sqrt_le_sqrt_add_of_causallyFollows hu hv
+  rw [ageGap_eq]
+  linarith
 
 /-!
 
@@ -96,7 +154,7 @@ def example1 : InstantaneousTwinParadox where
   endPoint_causallyFollows_startPoint := by
     simp [causallyFollows]
     left
-    simp only [interiorFutureLightCone, sub_zero, Fin.isValue, Set.mem_setOf_eq, Nat.ofNat_pos,
+    simp only [interiorFutureLightCone, sub_zero, Fin.isValue, Set.mem_ofPred_eq, Nat.ofNat_pos,
       and_true]
     refine (timeLike_iff_norm_sq_pos _).mpr ?_
     rw [minkowskiProduct_toCoord]
@@ -104,7 +162,7 @@ def example1 : InstantaneousTwinParadox where
   twinBMid_causallyFollows_startPoint := by
     simp only [causallyFollows]
     left
-    simp only [interiorFutureLightCone, sub_zero, Fin.isValue, Set.mem_setOf_eq]
+    simp only [interiorFutureLightCone, sub_zero, Fin.isValue, Set.mem_ofPred_eq]
     norm_num
     refine (timeLike_iff_norm_sq_pos _).mpr ?_
     rw [minkowskiProduct_toCoord]
@@ -132,6 +190,11 @@ lemma example1_properTimeTwinB : example1.properTimeTwinB = 9 := by
 
 lemma example1_ageGap : example1.ageGap = 6 := by
   norm_num [ageGap]
+
+/-- The example above has a nonzero age gap. -/
+lemma example1_ageGap_ne_zero : example1.ageGap ≠ 0 := by
+  rw [example1_ageGap]
+  norm_num
 
 end InstantaneousTwinParadox
 

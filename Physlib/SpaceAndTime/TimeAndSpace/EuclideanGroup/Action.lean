@@ -32,6 +32,7 @@ the time coordinate and acts on the space coordinate by the usual Euclidean-grou
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section
@@ -147,6 +148,6 @@ lemma isometry_smul (g : EuclideanGroup d) :
 /-- The Euclidean-group action on `TimeAndSpace d` is antilipschitz. -/
 lemma antilipschitz_smul (g : EuclideanGroup d) :
     AntilipschitzWith 1 (fun tx : TimeAndSpace d => g • tx) :=
-  (isometry_smul g).antilipschitz
+  (isometry_smul g).antilipschitzWith
 
 end TimeAndSpace

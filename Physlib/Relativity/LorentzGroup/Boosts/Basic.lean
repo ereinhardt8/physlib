@@ -6,6 +6,8 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.LorentzGroup.Basic
+public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Analysis.Real.Sqrt
 /-!
 # Boosts in the Lorentz group
 
@@ -47,6 +49,7 @@ lemma γ_det_not_zero (β : ℝ) (hβ : |β| < 1) : (1 - β^2) ≠ 0 := by
   simp at h1
   aesop
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The Lorentz boost with in the space direction `i` with speed `β` with
   `|β| < 1`. -/
 def boost (i : Fin d) (β : ℝ) (hβ : |β| < 1) : LorentzGroup d :=
@@ -95,8 +98,8 @@ where
             ring
           · simp only [hk', ↓reduceIte, Fin.isValue]
             rw [one_apply_ne fun a => hk (id (Eq.symm a))]
-            rw [if_neg (by exact fun a => hk (id (Eq.symm a)))]
-            rw [if_neg (by exact fun a => hk' (id (Eq.symm a)))]
+            rw [ite_eq_right (by exact fun a => hk (id (Eq.symm a)))]
+            rw [ite_eq_right (by exact fun a => hk' (id (Eq.symm a)))]
             simp
       · intro b _ hb
         simp [hb]
@@ -121,7 +124,8 @@ where
           · rw [one_apply]
             simp only [Fin.isValue, reduceCtorEq, ↓reduceIte, Sum.inr.injEq, hk, and_true, and_self,
               neg_mul, one_mul, neg_neg, zero_add]
-            rw [if_neg (fun a => hk (id (Eq.symm a))), if_neg (fun a => hk (id (Eq.symm a)))]
+            rw [ite_eq_right (fun a => hk (id (Eq.symm a))),
+              ite_eq_right (fun a => hk (id (Eq.symm a)))]
         · rw [one_apply]
           simp [hj']
       · intro b _ hb
@@ -143,6 +147,7 @@ where
         · simp [hb']
       · simp
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma boost_transpose_eq_self (i : Fin d) {β : ℝ} (hβ : |β| < 1) :
     transpose (boost i β hβ) = boost i β hβ := by

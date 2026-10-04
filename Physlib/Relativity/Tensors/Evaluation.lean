@@ -7,7 +7,7 @@ module
 
 public import Physlib.Relativity.Tensors.Product
 public import Physlib.Relativity.Tensors.Contraction.Basis
-public import Physlib.Meta.Sorry
+public import Physlib.Relativity.Tensors.ComponentIdx.Single
 /-!
 
 # Evaluation of tensor indices
@@ -72,7 +72,6 @@ lemma evalPCoeff_basisVector (i : Fin (n + 1)) (φ : basisIdx (c i)) (b' : Compo
 noncomputable def evalP (i : Fin (n + 1)) (φ : basisIdx (c i)) (p : Pure S c) :
   Tensor S (c ∘ i.succAbove) := evalPCoeff i φ p • (drop p i).toTensor
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma evalP_update_add [inst : DecidableEq (Fin (n + 1))] (i j : Fin (n + 1))
     (φ : basisIdx (c i)) (p : Pure S c)
@@ -84,7 +83,6 @@ lemma evalP_update_add [inst : DecidableEq (Fin (n + 1))] (i j : Fin (n + 1))
   · simp [add_smul]
   · simp
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma evalP_update_smul [inst : DecidableEq (Fin (n + 1))] (i j : Fin (n + 1))
     (φ : basisIdx (c i)) (p : Pure S c)
@@ -190,8 +188,59 @@ lemma evalT_permT {n m : ℕ} {c : Fin (n + 1) → C} {c' : Fin (m + 1) → C}
 
 -/
 
-TODO "Add the lemma corresponding the the commutation of two evaluations of tensor
-  indices."
+/-- Commutation of two evaluations on a tensor basis vector. -/
+lemma evalT_evalT_basis {n : ℕ} {c : Fin (n + 1 + 1) → C}
+    (k1 : Fin (n + 1 + 1)) (k2 : Fin (n + 1)) (φ1 : basisIdx (c k1))
+    (φ2 : basisIdx ((c ∘ k1.succAbove) k2)) (ψ : ComponentIdx (S := S) c) :
+    evalT k2 φ2 (evalT k1 φ1 (basis (S := S) c ψ)) =
+      permT id (IsReindexing.succAbove_succAbove_comm k1 k2)
+        (evalT (k2.predAbove k1)
+          (basisIdxCongr
+            (congrArg c (Fin.succAbove_succAbove_predAbove k1 k2).symm) φ1)
+          (evalT (k1.succAbove k2) φ2 (basis (S := S) c ψ))) := by
+  simp only [evalT_basis, apply_ite, map_zero]
+  have hk1 : (k1.succAbove k2).succAbove (k2.predAbove k1) = k1 :=
+    Fin.succAbove_succAbove_predAbove k1 k2
+  have hcond :
+      (ψ ((k1.succAbove k2).succAbove (k2.predAbove k1)) =
+          basisIdxCongr (congrArg c hk1.symm) φ1) ↔ ψ k1 = φ1 := by
+    rw [ComponentIdx.congr_right ψ _ k1 hk1]
+    exact (basisIdxCongr _).apply_eq_iff_eq
+  by_cases h2 : ψ (k1.succAbove k2) = φ2
+  · by_cases h1 : ψ k1 = φ1
+    · have htr :
+          ψ ((k1.succAbove k2).succAbove (k2.predAbove k1)) =
+            basisIdxCongr (congrArg c hk1.symm) φ1 := hcond.mpr h1
+      simp only [h2, h1, htr, ↓reduceIte]
+      rw [permT_basis]
+      congr 1
+      funext i
+      exact ComponentIdx.congr_right ψ _ _
+        (Fin.succAbove_succAbove_succAbove_predAbove k1 k2 i).symm
+    · have hntr :
+          ¬ ψ ((k1.succAbove k2).succAbove (k2.predAbove k1)) =
+              basisIdxCongr (congrArg c hk1.symm) φ1 := by
+        intro htr
+        exact h1 (hcond.mp htr)
+      simp only [h2, h1, hntr, ↓reduceIte]
+  · simp only [h2, ↓reduceIte, ite_self]
+
+/-- Evaluating two tensor indices commutes, up to the canonical reindexing
+identifying the two possible orders in which the indices are removed. -/
+lemma evalT_evalT {n : ℕ} {c : Fin (n + 1 + 1) → C}
+    (k1 : Fin (n + 1 + 1)) (k2 : Fin (n + 1)) (φ1 : basisIdx (c k1))
+    (φ2 : basisIdx ((c ∘ k1.succAbove) k2)) (t : Tensor S c) :
+    evalT k2 φ2 (evalT k1 φ1 t) =
+      permT id (IsReindexing.succAbove_succAbove_comm k1 k2)
+        (evalT (k2.predAbove k1)
+          (basisIdxCongr
+            (congrArg c (Fin.succAbove_succAbove_predAbove k1 k2).symm) φ1)
+          (evalT (k1.succAbove k2) φ2 t)) := by
+  induction' t using Tensor.induction_on_basis with ψ a t ht t1 t2 ht1 ht2
+  · exact evalT_evalT_basis (S := S) k1 k2 φ1 φ2 ψ
+  · simp
+  · simp only [map_smul, ht]
+  · simp only [map_add, ht1, ht2]
 
 /-!
 
@@ -273,8 +322,8 @@ lemma evalT_prodT_right {n n1 : ℕ} {c : Fin n → C} {c1 : Fin (n1 + 1) → C}
       · have hprod : ComponentIdx.prod.symm (b, b1) (Fin.natAdd (m := n1 + 1) n i) =
             basisIdxCongr (by simp) x := by
           simp [hi]
-        rw [prodT_basis', evalT_basis, if_pos hprod, permT_basis]
-        rw [evalT_basis, if_pos hi, prodT_basis']
+        rw [prodT_basis', evalT_basis, ite_eq_left hprod, permT_basis]
+        rw [evalT_basis, ite_eq_left hi, prodT_basis']
         congr
         ext j
         refine Fin.addCases (fun a => ?_) (fun a => ?_) j
@@ -311,8 +360,8 @@ lemma evalT_prodT_right {n n1 : ℕ} {c : Fin n → C} {c1 : Fin (n1 + 1) → C}
             basisIdxCongr (by simp) x := by
           intro hprod
           exact hi (by simpa [ComponentIdx.prod] using hprod)
-        rw [prodT_basis', evalT_basis, if_neg hprod]
-        rw [evalT_basis, if_neg hi]
+        rw [prodT_basis', evalT_basis, ite_eq_right hprod]
+        rw [evalT_basis, ite_eq_right hi]
         simp
     · simp
     · simp [ht]
@@ -328,23 +377,24 @@ TODO "Add a lemmas related to the commutation of evaluation with contraction."
 ## Other properties of evaluation
 
 -/
+set_option backward.isDefEq.respectTransparency false in
 /-- Evaluating the single-index basis tensor `basis ![c] (single.symm b)` at the index `x`
   yields the field element `1` if `b = x` (transported across `![c] 0 = c`) and `0` otherwise:
   evaluation of a one-index basis tensor is the Kronecker delta. -/
 lemma evalT_basis_single {c : C} (b : basisIdx c) (x : basisIdx (![c] 0)) :
-    (evalT 0 x (basis (S := S) ![c] (ComponentIdx.single.symm b))).toField =
+    (evalT 0 x (basis (S := S) ![c] (ComponentIdx.single.symm b))).toScalar =
     if basisIdxCongr (by simp) b =  x then 1 else 0 := by
   rw [evalT_basis]
   simp only [ComponentIdx.single_symm_apply]
   split_ifs
-  · exact toField_basis _
+  · exact toScalar_basis _
   · simp
 
 /-- Basis expansion of a one-index tensor: every `t : Tensor S ![c]` is the sum over basis
-  indices `i` of its evaluation coefficient `toField (evalT 0 i t)` times the corresponding
+  indices `i` of its evaluation coefficient `toScalar (evalT 0 i t)` times the corresponding
   basis tensor. -/
 lemma eq_sum_evalT_of_single_tensor_basis {c : C} (t : Tensor S ![c]) :
-    t = ∑ i, toField (evalT 0 i t) • basis ![c] (ComponentIdx.single.symm
+    t = ∑ i, toScalar (evalT 0 i t) • basis ![c] (ComponentIdx.single.symm
       (basisIdxCongr (by simp) i)) := by
   induction' t using Tensor.induction_on_basis with b a t h t1 t2 h1 h2
   · obtain ⟨i, rfl⟩ := ComponentIdx.single.symm.surjective b
@@ -379,10 +429,9 @@ lemma eq_sum_evalT {n : ℕ} {c : Fin (n + 1) → C} (t : Tensor S c) :
         exact ComponentIdx.congr_right b _ _ (by rw [Fin.succAbove_last]; rfl)
       · simp only [id_eq, ComponentIdx.prod_symm_natAdd, ComponentIdx.single_symm_apply,
           basisIdxCongr_apply_apply]
-        erw [basisIdxCongr_apply_apply]
         exact ComponentIdx.congr_right _ _ _ (by fin_cases j; rfl)
     · intro j h1 h1
-      rw [if_neg (by grind)]
+      rw [ite_eq_right (by grind)]
       simp
     · simp
   · simp
@@ -413,13 +462,13 @@ lemma eq_sum_evalT_zero {n : ℕ} {c : Fin (n + 1) → C} (t : Tensor S c) :
           ComponentIdx.single_symm_apply, basisIdxCongr_apply_apply]
         exact ComponentIdx.congr_right b 0 0 rfl
       · simp only [ComponentIdx.prod, Equiv.coe_fn_symm_mk, Fin.addCases]
-        rw [dif_neg (by simp)]
+        rw [dite_eq_right (by simp)]
         simp only [eqRec_eq_cast, basisIdxCongr, Equiv.cast_apply, cast_cast]
         symm
         rw [cast_eq_iff_heq]
         congr 1
     · intro j h1 h1
-      rw [if_neg (by grind)]
+      rw [ite_eq_right (by grind)]
       simp
     · simp
   · simp

@@ -50,8 +50,9 @@ Units within Physlib are implemented with the following convention:
 ## References
 
 Zulip chats discussing units:
-- https://leanprover.zulipchat.com/#narrow/channel/479953-Physlib/topic/physical.20units
-- https://leanprover.zulipchat.com/#narrow/channel/116395-maths/topic/Dimensional.20Analysis.20Revisited/with/530238303
+
+* https://leanprover.zulipchat.com/#narrow/channel/479953-Physlib/topic/physical.20units.
+* https://leanprover.zulipchat.com/#narrow/channel/116395-maths/topic/Dimensional.20Analysis.20Revisited/with/530238303.
 
 ## Note
 
@@ -108,12 +109,10 @@ noncomputable def dimScale (u1 u2 : LTMCTUnitChoices) :Dimension LTMCTDimensionB
   map_one' := by
     simp
   map_mul' d1 d2 := by
-    simp only [Dimension.length_mul, Rat.cast_add, Dimension.time_mul, Dimension.mass_mul,
-      Dimension.charge_mul, Dimension.temperature_mul]
-    repeat rw [rpow_add]
+    simp only [Dimension.length_mul, Dimension.Exponent.coe_add, Rat.cast_add, Dimension.time_mul,
+      Dimension.mass_mul, Dimension.charge_mul, Dimension.temperature_mul]
+    repeat rw [NNReal.rpow_add (by simp)]
     ring
-    all_goals
-      simp
 
 lemma dimScale_apply (u1 u2 : LTMCTUnitChoices) (d : Dimension LTMCTDimensionBase) :
     dimScale u1 u2 d =
@@ -144,11 +143,9 @@ lemma dimScale_transitive (u1 u2 u3 : LTMCTUnitChoices) (d : Dimension LTMCTDime
       (u2.temperature / u3.temperature) ^ (d.temperature : ℝ))
   · ring
   repeat rw [← mul_rpow]
-  apply NNReal.eq
-  simp only [LengthUnit.div_eq_val, TimeUnit.div_eq_val, MassUnit.div_eq_val, ChargeUnit.div_eq_val,
-    TemperatureUnit.div_eq_val, NNReal.coe_mul, coe_rpow]
-  rw [toReal]
-  field_simp
+  rw [PositiveRealUnitCore.div_mul_div, PositiveRealUnitCore.div_mul_div,
+    PositiveRealUnitCore.div_mul_div, PositiveRealUnitCore.div_mul_div,
+    PositiveRealUnitCore.div_mul_div]
 
 @[simp]
 lemma dimScale_mul_symm (u1 u2 : LTMCTUnitChoices) (d : Dimension LTMCTDimensionBase) :
@@ -171,11 +168,11 @@ lemma dimScale_symm (u1 u2 : LTMCTUnitChoices) (d : Dimension LTMCTDimensionBase
     dimScale u1 u2 d = (dimScale u2 u1 d)⁻¹ := by
   simp only [dimScale_apply, mul_inv]
   congr
-  · rw [LengthUnit.div_symm, inv_rpow]
-  · rw [TimeUnit.div_symm, inv_rpow]
-  · rw [MassUnit.div_symm, inv_rpow]
-  · rw [ChargeUnit.div_symm, inv_rpow]
-  · rw [TemperatureUnit.div_symm, inv_rpow]
+  · rw [PositiveRealUnitCore.div_symm, inv_rpow]
+  · rw [PositiveRealUnitCore.div_symm, inv_rpow]
+  · rw [PositiveRealUnitCore.div_symm, inv_rpow]
+  · rw [PositiveRealUnitCore.div_symm, inv_rpow]
+  · rw [PositiveRealUnitCore.div_symm, inv_rpow]
 
 lemma dimScale_of_inv_eq_swap (u1 u2 : LTMCTUnitChoices) (d : Dimension LTMCTDimensionBase) :
     dimScale u1 u2 d⁻¹ = dimScale u2 u1 d := by
@@ -234,11 +231,11 @@ lemma SI_temperature : SI.temperature = TemperatureUnit.kelvin := rfl
   of the underlying units. This is useful in proving that a result is not
   dimensionally correct. -/
 noncomputable def SIPrimed : LTMCTUnitChoices where
-  length := LengthUnit.scale 2 LengthUnit.meters
-  time := TimeUnit.scale 3 TimeUnit.seconds
-  mass := MassUnit.scale 5 MassUnit.kilograms
-  charge := ChargeUnit.scale 7 ChargeUnit.coulombs
-  temperature := TemperatureUnit.scale 11 TemperatureUnit.kelvin
+  length := PositiveRealUnitCore.scale 2 LengthUnit.meters
+  time := PositiveRealUnitCore.scale 3 TimeUnit.seconds
+  mass := PositiveRealUnitCore.scale 5 MassUnit.kilograms
+  charge := PositiveRealUnitCore.scale 7 ChargeUnit.coulombs
+  temperature := PositiveRealUnitCore.scale 11 TemperatureUnit.kelvin
 
 @[simp]
 lemma dimScale_SI_SIPrimed (d : Dimension LTMCTDimensionBase) :
@@ -322,10 +319,7 @@ instance {M : Type} [CarriesDimension M] :
 
 @[ext]
 lemma Dimensionful.ext {M : Type} [CarriesDimension M] (f1 f2 : Dimensionful M)
-    (h : f1.val = f2.val) : f1 = f2 := by
-  cases f1
-  cases f2
-  simp_all
+    (h : f1.val = f2.val) : f1 = f2 := Subtype.ext h
 
 instance {M : Type} [CarriesDimension M] : MulAction ℝ≥0 (Dimensionful M) where
   smul a f := ⟨fun u => a • f.1 u, fun u1 u2 => by

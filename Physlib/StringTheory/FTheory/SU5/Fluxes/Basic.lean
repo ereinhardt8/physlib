@@ -5,7 +5,9 @@ Authors: Joseph Tooby-Smith
 -/
 module
 
-public import Mathlib.Analysis.Normed.Ring.Lemmas
+public import Mathlib.Algebra.BigOperators.Group.Multiset.Basic
+public import Mathlib.Tactic.Ring.RingNF
+
 /-!
 
 # Fluxes of representations
@@ -118,9 +120,8 @@ they can be derived from other data structures.
 
 ## iv. References
 
-- [1] arXiv:1401.5084
-- For an old version of the material in this module see PR #569.
-
+* Rational F-Theory GUTs without exotics (arXiv:1401.5084). [ref: arxiv_1401_5084]
+* For an old version of the material in this module see PR #569.
 -/
 
 @[expose] public section

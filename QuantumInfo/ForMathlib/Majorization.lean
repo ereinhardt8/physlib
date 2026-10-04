@@ -5,8 +5,9 @@ Authors: Alex Meiburg
 -/
 module
 
-public import Mathlib
+public import Mathlib.Data.Set.PowersetCard
 public import QuantumInfo.ForMathlib.Matrix
+public import Mathlib.Tactic.Cases
 
 /-! # Majorization and weak log-majorization
 
@@ -238,6 +239,7 @@ lemma compoundMatrix_mul (M N : Matrix d d ℂ) (k : ℕ) :
   ext1
   apply cauchyBinet
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `compoundMatrix` commutes with `conjTranspose`. -/
 lemma compoundMatrix_conjTranspose (M : Matrix d d ℂ) (k : ℕ) :
     compoundMatrix M.conjTranspose k = (compoundMatrix M k).conjTranspose := by
@@ -246,6 +248,7 @@ lemma compoundMatrix_conjTranspose (M : Matrix d d ℂ) (k : ℕ) :
   rw [Matrix.conjTranspose_apply, ← Matrix.det_conjTranspose]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
 /--
 The compound matrix of a diagonal matrix is diagonal, with entries being
 products of eigenvalues over k-subsets. -/
@@ -254,7 +257,7 @@ lemma compoundMatrix_diagonal (f : d → ℂ) (k : ℕ) :
     Matrix.diagonal (fun S : {S : Finset d // S.card = k} =>
       ∏ i : Fin k, f (S.1.orderEmbOfFin S.2 i)) := by
   ext S T; by_cases h : S = T <;> simp_all [Matrix.diagonal]
-  · refine' Matrix.det_of_upperTriangular _ |> fun h => h.trans _
+  · refine' Matrix.det_of_isUpperTriangular _ |> fun h => h.trans _
     · intro i j hij; aesop
     · aesop
   · -- Since $S \neq T$, there exists some $i \in S$ such that $i \notin T$.
@@ -363,7 +366,7 @@ lemma prod_le_prod_sorted {n : ℕ} {f : Fin n → ℝ}
         ← Finset.prod_image (f := f) (fun a _ b _ h => hg'_inj (by simpa using h))]
     exact Finset.prod_congr hg'_eq (fun _ _ => rfl)
   rw [h_prod_eq]
-  apply Finset.prod_le_prod (fun i _ => hf_nn _) (fun i _ => ?_)
+  apply Finset.prod_le_prod₀ (fun i _ => hf_nn _) (fun i _ => ?_)
   apply hf
   -- Need: i.val ≤ (g' i).val for strictly monotone g'
   -- By induction: g'(0) ≥ 0, and g'(j+1) > g'(j) ≥ j implies g'(j+1) ≥ j+1
@@ -461,6 +464,7 @@ lemma singularValues_compoundMatrix_rev (M : Matrix d d ℂ) (k : ℕ)
   obtain ⟨σ, hσ⟩ := singularValues_compoundMatrix_perm M k
   exact ⟨σ.symm j, by rw [← hσ]; simp⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- There exists a bijection `σ : Fin (card d) ≃ d` such that
     `singularValues M (σ i) = singularValuesSorted M i` for all `i`. -/
 lemma exists_sorting_equiv (M : Matrix d d ℂ) :
@@ -535,6 +539,7 @@ lemma prod_singularValues_subset_le_sorted_prod (M : Matrix d d ℂ) (k : ℕ)
   simpa [g] using congr_arg σ hij
 
 set_option maxHeartbeats 800000 in
+set_option backward.isDefEq.respectTransparency false in
 lemma exists_subset_prod_eq_sorted_prod (M : Matrix d d ℂ) (k : ℕ)
     (hk : k ≤ Fintype.card d) :
     ∃ S : {S : Finset d // S.card = k},
@@ -669,8 +674,8 @@ lemma IsHermitian.inner_le_sup_eigenvalue_mul_inner
     simp [dotProduct, Matrix.mulVec, Finset.mul_sum _ _ _, mul_assoc, mul_comm,]
     simp [Complex.normSq, Complex.sq_norm, diagonal]
     rw [← Finset.sum_sub_distrib]; refine' Finset.sum_congr rfl fun i hi => _; rw [Finset.sum_eq_single i, Finset.sum_eq_single i] <;> simp +contextual; ring_nf
-    · exact fun j hj => Or.inl (by rw [if_neg (Ne.symm hj)]; norm_num)
-    · exact fun j hj => Or.inl (by rw [if_neg (Ne.symm hj)]; norm_num)
+    · exact fun j hj => Or.inl (by rw [ite_eq_right (Ne.symm hj)]; norm_num)
+    · exact fun j hj => Or.inl (by rw [ite_eq_right (Ne.symm hj)]; norm_num)
   -- Since $U$ is unitary, we have $\|w\|^2 = \|v\|^2$.
   have h_unitary : ∑ i, ‖w i‖ ^ 2 = (star v ⬝ᵥ v).re := by
     have h_unitary : ∀ (U : Matrix e e ℂ), U.conjTranspose * U = 1 → ∀ (v : e → ℂ), ∑ i, ‖(U.mulVec v) i‖ ^ 2 = ∑ i, ‖v i‖ ^ 2 := by
@@ -841,7 +846,6 @@ For the direct induction approach on n:
 Hmm, this doesn't work cleanly because log(y_i/x_i) can be negative for some i.
 Better approach: prove it directly using the Abel summation identity and nonnegativity of each term.
 -/
-set_option backward.isDefEq.respectTransparency false in
 lemma sum_mul_log_nonneg_of_weak_log_maj {n : ℕ}
     {x y : Fin n → ℝ}
     (hx_pos : ∀ i, 0 < x i) (hy_pos : ∀ i, 0 < y i)

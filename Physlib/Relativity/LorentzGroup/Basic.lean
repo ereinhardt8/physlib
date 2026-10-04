@@ -7,10 +7,11 @@ module
 
 public import Physlib.Relativity.MinkowskiMatrix
 public import Physlib.Meta.TODO.Basic
-public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.Topology.Instances.Matrix
-public import Mathlib.Topology.Maps.Basic
+public import Mathlib.Topology.Algebra.Group.Units
 public import Mathlib.Topology.Algebra.Group.ClosedSubgroup
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Topology.Algebra.Ring.Real
 /-!
 # The Lorentz Group
 
@@ -18,9 +19,9 @@ We define the Lorentz group.
 
 ## References
 
-- *Lorentz Transformations, Rotations, and Boosts*, Jaffe.
-<https://cdn.ku.edu.tr/cdn/files/amostafazadeh/phys517_518/phys517_2016f/Handouts/A_Jaffi_Lorentz_Group.pdf>
-
+* Lorentz Transformations, Rotations, and Boosts, Jaffe.
+  <https://cdn.ku.edu.tr/cdn/files/amostafazadeh/phys517_518/phys517_2016f/Handouts/A_Jaffi_Lorentz_Group.pdf>.
+  [ref: jaffe_lorentz_notes]
 -/
 
 @[expose] public section
@@ -336,7 +337,7 @@ lemma toGL_embedding : IsEmbedding (@toGL d).toFun where
 /-- The embedding of the Lorentz group into `GL(n, ℝ)` gives `LorentzGroup d` an instance
   of a topological group. -/
 instance : IsTopologicalGroup (LorentzGroup d) :=
-  IsInducing.topologicalGroup toGL toGL_embedding.toIsInducing
+  IsInducing.isTopologicalGroup toGL toGL_embedding.toIsInducing
 
 /-!
 

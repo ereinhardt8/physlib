@@ -6,7 +6,7 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Pre.Modules
-public import Mathlib.RepresentationTheory.Rep.Basic
+public import Mathlib.RepresentationTheory.Intertwining
 /-!
 
 # Real Lorentz vectors
@@ -64,7 +64,6 @@ lemma continuous_contr {T : Type} [TopologicalSpace T] (f : T → ContrMod d)
     (h : Continuous (fun i => (f i).toFin1dℝ)) : Continuous f := by
   exact continuous_induced_rng.mpr h
 
-set_option backward.isDefEq.respectTransparency false in
 lemma contr_continuous {T : Type} [TopologicalSpace T] (f : ContrMod d → T)
     (h : Continuous (f ∘ (@ContrMod.toFin1dℝEquiv d).symm)) : Continuous f := by
   let x := Equiv.toHomeomorphOfIsInducing (@ContrMod.toFin1dℝEquiv d).toEquiv
@@ -107,8 +106,6 @@ lemma coBasisFin_toFin1dℝ {d : ℕ} (i : Fin (1 + d)) :
 
 lemma coBasisFin_repr_apply {d : ℕ} (p : CoMod d) (i : Fin (1 + d)) :
     (coBasisFin d).repr p i = p.val (finSumFinEquiv.symm i) := by rfl
-
-open CategoryTheory.MonoidalCategory
 
 /-!
 

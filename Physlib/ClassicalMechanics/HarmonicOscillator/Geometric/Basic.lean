@@ -6,8 +6,7 @@ Authors: Nicola Bernini, Nathaneal Sajan
 module
 
 public import Physlib.SpaceAndTime.Space.Basic
-public import Mathlib.Geometry.Manifold.Diffeomorph
-public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+public import Physlib.Meta.TODO.Basic
 
 /-!
 # Configuration space of the harmonic oscillator
@@ -57,8 +56,8 @@ tangent-coordinate infrastructure is used by later geometric constructions on th
 
 ## iv. References
 
-- Ivo Terek, Introductory Variational Calculus on Manifolds, page 1 (Section 1, Basic
-  definitions and examples).
+* Ivo Terek, Introductory Variational Calculus on Manifolds, page 1 (Section 1, Basic definitions
+  and examples). [ref: terek_variational_manifolds]
 -/
 
 @[expose] public section

@@ -5,7 +5,6 @@ Authors: Joseph Tooby-Smith
 -/
 module
 
-public import Physlib.Meta.TODO.Basic
 /-!
 
 ## Getting an array of all file paths in Physlib.
@@ -26,6 +25,10 @@ partial def allFilePaths.go (prev : Array FilePath)
     else
       pure (acc.push (root ++ "/" ++ entry.fileName))
   pure result
+
+/-- Gets an array of all file paths in the supplied directory. -/
+partial def getFilePaths (moduleName : String) : IO (Array FilePath) := do
+   allFilePaths.go (#[] : Array FilePath) moduleName moduleName
 
 /-- Gets an array of all file paths in `Physlib`. -/
 partial def allFilePaths : IO (Array FilePath) := do

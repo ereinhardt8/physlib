@@ -87,10 +87,10 @@ mean energies and integrability.
 
 ## 8. References
 
-* L. D. Landau & E. M. Lifshitz, *Statistical Physics, Part 1*.
+* L. D. Landau & E. M. Lifshitz, Statistical Physics, Part 1. [ref: landau_statphys1]
 * D. Tong, Cambridge Lecture Notes (sections on canonical ensemble).
-  - https://www.damtp.cam.ac.uk/user/tong/statphys/one.pdf
-  - https://www.damtp.cam.ac.uk/user/tong/statphys/two.pdf
+  - https://www.damtp.cam.ac.uk/user/tong/statphys/one.pdf [ref: tong_statphys_notes_one]
+  - https://www.damtp.cam.ac.uk/user/tong/statphys/two.pdf [ref: tong_statphys_notes_two]
 
 ## 9. Roadmap
 
@@ -465,6 +465,7 @@ lemma μProd_add {T : Temperature} [IsFiniteMeasure (𝓒.μBolt T)]
 lemma μProd_congr (e : ι1 ≃ᵐ ι) (T : Temperature) :
     (𝓒.congr e).μProd T = (𝓒.μProd T).map e.symm := by
   rw [μProd, μProd, μBolt_congr, Measure.map_smul, MeasurableEquiv.map_apply, Set.preimage_univ]
+  exact e.symm.measurable.aemeasurable
 
 lemma μProd_nsmul (n : ℕ) (T : Temperature) [IsFiniteMeasure (𝓒.μBolt T)] :
     (nsmul n 𝓒).μProd T = MeasureTheory.Measure.pi fun _ => 𝓒.μProd T := by

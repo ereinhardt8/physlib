@@ -7,7 +7,6 @@ module
 
 public import Physlib.QuantumMechanics.Operators.StateObservables.ExpectedValue
 public import Physlib.QuantumMechanics.Operators.StateObservables.IsEigenvector
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
 /-!
 # Variance and standard deviation
 
@@ -32,8 +31,7 @@ When `T` is symmetric, `‖ψ‖ = 1`, and `Tψ ∈ T.domain`, it also equals `�
 
 ## References
 
-- [B. C. Hall, *Quantum Theory for Mathematicians*, Chapter 12][hall2013quantum].
-
+* B. C. Hall, Quantum Theory for Mathematicians, Chapter 12. [ref: hall2013quantum]
 -/
 
 @[expose] public section

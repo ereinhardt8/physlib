@@ -46,8 +46,8 @@ properties thereof.
 
 ## iv. References
 
-A reference for the anomaly cancellation conditions is arXiv:1401.5084 equation 22.
-
+* Rational F-Theory GUTs without exotics (arXiv:1401.5084), Anomaly cancellation conditions,
+  equation 22. [ref: arxiv_1401_5084]
 -/
 
 @[expose] public section
@@ -208,8 +208,8 @@ There are two anomaly cancellation conditions in the SU(5)×U(1) model which inv
 - `∑ᵢ qᵢ² Nᵢ + 3 * ∑ₐ qₐ² Nₐ = 0` where the first sum is over all 5-bar representations and the
   second is over all 10d representations.
 
-According to arXiv:1401.5084 it is unclear whether this second condition should necessarily be
-imposed.
+According to arXiv:1401.5084 [ref: arxiv_1401_5084] it is unclear whether this second condition
+should necessarily be imposed.
 
 -/
 

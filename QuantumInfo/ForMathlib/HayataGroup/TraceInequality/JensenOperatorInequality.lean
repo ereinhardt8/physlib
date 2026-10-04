@@ -51,12 +51,12 @@ omit [CompleteSpace ℋ] in
 private theorem nontrivial_hsumL_wrap [Nontrivial ℋ] : Nontrivial (L (HSum ℋ)) := by
   have h_not_sub : ¬ Subsingleton ℋ := by
     intro hsub
-    letI : Subsingleton ℋ := hsub
-    letI : Subsingleton (L ℋ) := by infer_instance
+    let : Subsingleton ℋ := hsub
+    let : Subsingleton (L ℋ) := by infer_instance
     exact (not_nontrivial_iff_subsingleton.mpr (by infer_instance))
       (inferInstance : Nontrivial (L ℋ))
   have hH_nontriv : Nontrivial ℋ := (not_subsingleton_iff_nontrivial.mp h_not_sub)
-  letI : Nontrivial ℋ := hH_nontriv
+  let : Nontrivial ℋ := hH_nontriv
   rcases exists_pair_ne ℋ with ⟨x, y, hxy⟩
   let w : ℋ := x - y
   have hw : w ≠ 0 := sub_ne_zero.mpr hxy
@@ -165,7 +165,7 @@ private lemma spectrum_zero_subset_Ici_wrap :
     simpa using hx
   simp [Set.Ici, hx0]
 
-omit [Nontrivial ℋ] in
+omit [CompleteSpace ℋ] [Nontrivial ℋ] in
 private lemma blockDiagonal_le_left_wrap {A0 A1 B0 B1 : L ℋ}
     (h : blockDiagonal (ℋ := ℋ) A0 A1 ≤ blockDiagonal (ℋ := ℋ) B0 B1) :
     A0 ≤ B0 := by
@@ -181,7 +181,7 @@ private lemma blockDiagonal_le_left_wrap {A0 A1 B0 B1 : L ℋ}
     exact hsub ▸ sub_nonneg.mpr h
   have hpos :
       (blockDiagonal (ℋ := ℋ) (B0 - A0) (B1 - A1)).IsPositive :=
-    (ContinuousLinearMap.nonneg_iff_isPositive _).1 hnonneg
+    ContinuousLinearMap.nonneg_iff_isPositive.1 hnonneg
   have hleftPos : (B0 - A0).IsPositive := by
     rw [ContinuousLinearMap.isPositive_iff_complex]
     intro x
@@ -189,7 +189,7 @@ private lemma blockDiagonal_le_left_wrap {A0 A1 B0 B1 : L ℋ}
       (ContinuousLinearMap.isPositive_iff_complex
         (blockDiagonal (ℋ := ℋ) (B0 - A0) (B1 - A1))).1 hpos (hsumIncl ℋ 0 x)
     simpa [blockDiagonal, hsumProj, hsumIncl, hsumEquiv, PiLp.inner_apply] using hx
-  exact sub_nonneg.mp ((ContinuousLinearMap.nonneg_iff_isPositive _).2 hleftPos)
+  exact sub_nonneg.mp (ContinuousLinearMap.nonneg_iff_isPositive.2 hleftPos)
 
 -- Theorem 2.5.2 `(iv) → (v)`.
 set_option maxHeartbeats 3000000 in
@@ -208,7 +208,7 @@ theorem theorem_2_5_2_iv_imp_v {f : ℝ → ℝ} (hiv : CondIVAll.{u} f)
     simpa [Set.Ici] using hBs hx
   let Atilde : L (HSum ℋ) := blockDiagonal (ℋ := ℋ) A B
   let Xtilde : L (HSum ℋ) := blockOp (ℋ := ℋ) X 0 Y 0
-  letI : Nontrivial (L (HSum ℋ)) := nontrivial_hsumL_wrap (ℋ := ℋ)
+  let : Nontrivial (L (HSum ℋ)) := nontrivial_hsumL_wrap (ℋ := ℋ)
   have hAtilde_sa : IsSelfAdjoint Atilde := by
     simpa [Atilde] using blockDiagonal_selfAdjoint_wrap (ℋ := ℋ) hA hB
   have hAtilde0 : (0 : L (HSum ℋ)) ≤ Atilde := by
@@ -323,7 +323,7 @@ theorem theorem_2_5_2_i_ici_all_imp_v {f : ℝ → ℝ}
     simpa [Set.Ici] using hBs hx
   let Atilde : L (HSum ℋ) := blockDiagonal (ℋ := ℋ) A B
   let Xtilde : L (HSum ℋ) := blockOp (ℋ := ℋ) X 0 Y 0
-  letI : Nontrivial (L (HSum ℋ)) := nontrivial_hsumL_wrap (ℋ := ℋ)
+  let : Nontrivial (L (HSum ℋ)) := nontrivial_hsumL_wrap (ℋ := ℋ)
   have hAtilde_sa : IsSelfAdjoint Atilde := by
     simpa [Atilde] using blockDiagonal_selfAdjoint_wrap (ℋ := ℋ) hA hB
   have hAtilde0 : (0 : L (HSum ℋ)) ≤ Atilde := by

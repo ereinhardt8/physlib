@@ -5,7 +5,7 @@ Authors: Andrea Pari
 -/
 module
 
-public import Mathlib.Data.Complex.Basic
+public import Mathlib.Basic.Complex.Basic
 public import Physlib.Relativity.Tensors.Conjugation.Basic
 
 /-!
@@ -82,6 +82,7 @@ is real. The species can express none of these alone.
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section
@@ -410,18 +411,20 @@ def conjChiralCovector
   permT ![0] ⟨by decide, fun i => by fin_cases i; rfl⟩
     ((chiralTensor (ι := ι)).conjT t)
 
-/-- For scalar tensors, `toField` of the normalized tensor conjugate is the complex conjugate of
-`toField`. -/
-lemma toField_conjScalar (t : (chiralTensor (ι := ι)).Tensor ![]) :
-    (conjScalar t).toField = star t.toField := by
-  rw [conjScalar, toField_permT]
-  rw [toField_eq_repr, toField_eq_repr]
+set_option backward.isDefEq.respectTransparency false in
+/-- For scalar tensors, `toScalar` of the normalized tensor conjugate is the complex conjugate of
+`toScalar`. -/
+lemma toScalar_conjScalar (t : (chiralTensor (ι := ι)).Tensor ![]) :
+    (conjScalar t).toScalar = star t.toScalar := by
+  rw [conjScalar, toScalar_permT]
+  rw [toScalar_eq_repr, toScalar_eq_repr]
   change componentMap (S := (chiralTensor (ι := ι)).toTensorSpecies)
       ((chiralTensor (ι := ι)).bar ∘ ![]) ((chiralTensor (ι := ι)).conjT t) (fun j => Fin.elim0 j) =
     star ((basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![]).repr t (fun j => Fin.elim0 j))
   erw [ConjTensorSpecies.componentMap_conjT (S := chiralTensor (ι := ι))]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Component formula for the holomorphic covector conjugate: the `![I]` basis component of
 `conjChiralCovector t` is the complex conjugate of the `![I]` component of `t`. -/
 lemma repr_conjChiralCovector

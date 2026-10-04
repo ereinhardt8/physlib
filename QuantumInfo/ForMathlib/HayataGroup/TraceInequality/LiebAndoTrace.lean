@@ -7,9 +7,7 @@ module
 
 public import QuantumInfo.ForMathlib.HayataGroup.TraceInequality.OperatorGeometricMean
 public import QuantumInfo.ForMathlib.HayataGroup.TraceInequality.HilbertSchmidtOperatorSpace
-public import Mathlib.Analysis.CStarAlgebra.Matrix
 public import Mathlib.Analysis.InnerProductSpace.JointEigenspace
-public import Mathlib.Analysis.Matrix.HermitianFunctionalCalculus
 public import Mathlib.LinearAlgebra.Lagrange
 public import Mathlib.LinearAlgebra.Trace
 
@@ -126,10 +124,10 @@ private lemma rightMulHS_pdSet {A : L ℋ} (hA : A ∈ pdSet (ℋ := ℋ)) :
   have hright_sa : IsSelfAdjoint (rightMulHS (ℋ := ℋ) A) := by
     change star (rightMulHS (ℋ := ℋ) A) = rightMulHS (ℋ := ℋ) A
     simp [hA_sa.star_eq]
-  letI : Nontrivial (HSOp ℋ) := by
+  let : Nontrivial (HSOp ℋ) := by
     delta HSOp
     infer_instance
-  letI : Nontrivial (L (HSOp ℋ)) := inferInstance
+  let : Nontrivial (L (HSOp ℋ)) := inferInstance
   refine ⟨hright_sa, ?_⟩
   rcases (CFC.exists_pos_algebraMap_le_iff (A := L ℋ) (a := A) (ha := hA_sa)).2 hA_spec
     with ⟨r, hr, hrA⟩
@@ -146,7 +144,7 @@ omit [Nontrivial ℋ] in
 private lemma phiK_nonneg (K : L ℋ) {T : L (HSOp ℋ)} (hT : 0 ≤ T) :
     0 ≤ phiK (ℋ := ℋ) K T := by
   dsimp [phiK]
-  have hpos : T.IsPositive := (ContinuousLinearMap.nonneg_iff_isPositive T).1 hT
+  have hpos : T.IsPositive := ContinuousLinearMap.nonneg_iff_isPositive.1 hT
   have hnonneg : 0 ≤ Complex.re (inner ℂ (T (ofOp (star K))) (ofOp (star K))) := by
     exact ((ContinuousLinearMap.isPositive_iff_complex T).1 hpos (ofOp (star K))).2
   have hre :
@@ -208,7 +206,7 @@ private lemma re_inner_nonneg_of_nonneg
     {T : 𝓚 →L[ℂ] 𝓚} (hT : 0 ≤ T) :
     ∀ x : 𝓚, 0 ≤ Complex.re (inner ℂ x (T x)) := by
   intro x
-  have hpos : T.IsPositive := (ContinuousLinearMap.nonneg_iff_isPositive T).1 hT
+  have hpos : T.IsPositive := ContinuousLinearMap.nonneg_iff_isPositive.1 hT
   have hnonneg : 0 ≤ Complex.re (inner ℂ (T x) x) :=
     ((ContinuousLinearMap.isPositive_iff_complex T).1 hpos x).2
   have hre :
@@ -248,7 +246,7 @@ private lemma cfcR_apply_of_mem_eigenspace_real
     (f : ℝ → ℝ) {T : L 𝓚} (hT : IsSelfAdjoint T) {r : ℝ} {x : 𝓚}
     (hx : x ∈ eigenspace T.toLinearMap (r : ℂ)) :
     cfcR (ℋ := 𝓚) f T x = (f r : ℂ) • x := by
-  haveI : IsScalarTower ℝ ℂ (L 𝓚) := RestrictScalars.isScalarTower ℝ ℂ (L 𝓚)
+  have : IsScalarTower ℝ ℂ (L 𝓚) := RestrictScalars.isScalarTower ℝ ℂ (L 𝓚)
   classical
   by_cases hx0 : x = 0
   · simp [hx0]
@@ -550,6 +548,7 @@ private lemma hmiddle_leftMul_rightMul
   simpa [lhs, rhs] using hlhs_eq_rhs
 
 -- The bridge lemma expands a large `HSOp`-valued generalized perspective term.
+set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 800000 in
 private lemma phiK_operatorPowerMean_eq_liebTraceMap
     {s : ℝ} (K A B : L ℋ) (hA : A ∈ pdSet (ℋ := ℋ)) (hB : B ∈ pdSet (ℋ := ℋ)) :
@@ -799,6 +798,7 @@ lemma pdSet_convexCombo {A B : L ℋ} {t : ℝ}
   simpa [C] using
     (CFC.exists_pos_algebraMap_le_iff (A := L ℋ) (a := C) (ha := hC)).1 ⟨rC, hrC, hrC_le⟩ x hx
 
+set_option backward.isDefEq.respectTransparency false in
 omit [Nontrivial ℋ] in
 private lemma phiK_leftMul_rightMul_eq_traceRe (K C D : L ℋ) :
     phiK (ℋ := ℋ) K
@@ -1073,10 +1073,10 @@ theorem liebTrace_jointlyConcaveOn_pdSet
   have hB_combo :
       ((1 - θ) • B₁ + θ • B₂) ∈ pdSet (ℋ := ℋ) := by
     exact pdSet_convexCombo (ℋ := ℋ) hB₁ hB₂ hθ0 hθ1
-  letI : Nontrivial (HSOp ℋ) := by
+  let : Nontrivial (HSOp ℋ) := by
     delta HSOp
     infer_instance
-  letI : Nontrivial (L (HSOp ℋ)) := inferInstance
+  let : Nontrivial (L (HSOp ℋ)) := inferInstance
   have hconc_hs :=
     operatorPowerMean_jointlyConcaveOn_pdSet
       (ℋ := HSOp ℋ) (α := s) (β := 1)
@@ -1138,10 +1138,10 @@ theorem liebTrace_jointlyConvexOn_pdSet
   have hB_combo :
       ((1 - θ) • B₁ + θ • B₂) ∈ pdSet (ℋ := ℋ) := by
     exact pdSet_convexCombo (ℋ := ℋ) hB₁ hB₂ hθ0 hθ1
-  letI : Nontrivial (HSOp ℋ) := by
+  let : Nontrivial (HSOp ℋ) := by
     delta HSOp
     infer_instance
-  letI : Nontrivial (L (HSOp ℋ)) := inferInstance
+  let : Nontrivial (L (HSOp ℋ)) := inferInstance
   have hconv_hs :=
     operatorPowerMean_jointlyConvexOn_pdSet
       (ℋ := HSOp ℋ) (α := s) (β := 1)

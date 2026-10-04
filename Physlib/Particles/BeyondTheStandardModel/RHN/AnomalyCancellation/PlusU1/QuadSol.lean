@@ -12,10 +12,11 @@ public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.P
 We give a series of properties held by solutions to the quadratic equation.
 
 In particular given a quad solution we define a map from linear solutions to quadratic solutions
-and show that it is a surjection. The main reference for this is:
+and show that it is a surjection.
 
-- https://arxiv.org/abs/2006.03588
+## References
 
+* The main reference for this is https://arxiv.org/abs/2006.03588. [ref: arxiv_2006_03588]
 -/
 
 @[expose] public section
@@ -57,7 +58,7 @@ lemma accQuad_α₁_α₂ (S : (PlusU1 n).LinSols) :
 lemma accQuad_α₁_α₂_zero (S : (PlusU1 n).LinSols) (h1 : α₁ C S = 0)
     (h2 : α₂ S = 0) (a b : ℚ) : accQuad (a • S + b • C.1).val = 0 := by
   erw [add_AFL_quad]
-  simp only [α₁, quadBiLin_toFun_apply, Fin.isValue, neg_mul, neg_eq_zero, mul_eq_zero,
+  simp only [α₁, neg_mul, neg_eq_zero, mul_eq_zero,
     OfNat.ofNat_ne_zero, false_or, α₂, HomogeneousQuadratic, accQuad] at h1 h2
   simp [h1, h2]
 
@@ -118,21 +119,21 @@ lemma toQuadInv_special (S : (PlusU1 n).QuadSols) (h : α₁ C S.1 = 0) :
     specialToQuad C (toQuadInv C S).1 (toQuadInv C S).2.1 (toQuadInv C S).2.2
     ((toQuadInv_α₁_α₂ C S).mp h).1 ((toQuadInv_α₁_α₂ C S).mp h).2 = S := by
   simp only [toQuadInv_fst]
-  rw [show (toQuadInv C S).2.1 = 1 by rw [toQuadInv, if_pos h],
-    show (toQuadInv C S).2.2 = 0 by rw [toQuadInv, if_pos h], special_on_quad]
+  rw [show (toQuadInv C S).2.1 = 1 by rw [toQuadInv, ite_eq_left h],
+    show (toQuadInv C S).2.2 = 0 by rw [toQuadInv, ite_eq_left h], special_on_quad]
 
 lemma toQuadInv_generic (S : (PlusU1 n).QuadSols) (h : α₁ C S.1 ≠ 0) :
     (toQuadInv C S).2.1 • genericToQuad C (toQuadInv C S).1 = S := by
   simp only [toQuadInv_fst]
-  rw [show (toQuadInv C S).2.1 = (α₁ C S.1)⁻¹ by rw [toQuadInv, if_neg h],
+  rw [show (toQuadInv C S).2.1 = (α₁ C S.1)⁻¹ by rw [toQuadInv, ite_eq_right h],
     genericToQuad_ne_zero C S h]
 
 lemma toQuad_rightInverse : Function.RightInverse (@toQuadInv n C) (toQuad C) := by
   intro S
   by_cases h : α₁ C S.1 = 0
-  · rw [toQuad, dif_pos ((toQuadInv_α₁_α₂ C S).mp h)]
+  · rw [toQuad, dite_eq_left ((toQuadInv_α₁_α₂ C S).mp h)]
     exact toQuadInv_special C S h
-  · rw [toQuad, dif_neg ((toQuadInv_α₁_α₂ C S).mpr.mt h)]
+  · rw [toQuad, dite_eq_right ((toQuadInv_α₁_α₂ C S).mpr.mt h)]
     exact toQuadInv_generic C S h
 
 theorem toQuad_surjective : Function.Surjective (toQuad C) :=

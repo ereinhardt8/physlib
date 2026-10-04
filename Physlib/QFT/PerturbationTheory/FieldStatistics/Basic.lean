@@ -5,7 +5,7 @@ Authors: Joseph Tooby-Smith
 -/
 module
 
-public import Physlib.Mathematics.List.InsertIdx
+public import Physlib.Mathematics.ForMathlib.List.InsertIdx
 public import Mathlib.Tactic.FinCases
 public import Mathlib.Algebra.BigOperators.Group.Finset.Piecewise
 public import Mathlib.Data.Fintype.Card
@@ -238,7 +238,7 @@ lemma ofList_map_eq_finset_prod (s : 𝓕 → FieldStatistic) :
     simp only [List.length_cons, mul_ite, ite_mul, one_mul, mul_one]
     by_cases ha : a = i
     · simp only [ha, ↓reduceIte, mul_self, true_or]
-      rw [if_neg]
+      rw [ite_eq_right]
       rfl
       simp only [List.length_cons, List.nodup_cons] at hl
       exact hl.1

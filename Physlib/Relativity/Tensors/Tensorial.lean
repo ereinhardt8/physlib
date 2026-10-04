@@ -5,7 +5,6 @@ Authors: Joseph Tooby-Smith
 -/
 module
 
-public import Physlib.Relativity.Tensors.Product
 public import Physlib.Relativity.Tensors.Evaluation
 public import Mathlib.Topology.Algebra.Module.FiniteDimension
 /-!
@@ -51,8 +50,7 @@ We define the class `Tensorial` here, and provide an API around its use.
 
 ## iv. References
 
-There are no known references for this material.
-
+* None.
 -/
 
 @[expose] public section
@@ -133,7 +131,6 @@ We now define the action of the group `G` on a type `M` carrying a tensorial ins
 noncomputable instance (priority := high) smulAction [Tensorial S c M] : SMul G M where
   smul g m := toTensor.symm (g • toTensor m)
 
-set_option backward.isDefEq.respectTransparency false in
 noncomputable instance mulAction [Tensorial S c M] : MulAction G M where
   one_smul m := by
     change toTensor.symm (1 • toTensor m) = _
@@ -171,7 +168,6 @@ lemma smul_toTensor_symm {g : G} {t : Tensor S c} [self : Tensorial S c M] :
 
 -/
 
-set_option backward.isDefEq.respectTransparency false in
 noncomputable instance (priority := high) distribMulAction [Tensorial S c M] :
     DistribMulAction G M where
   smul_add g m m' := by
@@ -187,7 +183,6 @@ noncomputable instance (priority := high) distribMulAction [Tensorial S c M] :
 
 -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The action of the group on a `Tensorial` instance as a linear map. -/
 noncomputable def smulLinearMap (g : G) [Tensorial S c M] : M →ₗ[k] M where
   toFun m := g • m
@@ -207,11 +202,12 @@ lemma smulLinearMap_apply {g : G} [Tensorial S c M] (m : M) :
 
 -/
 
-set_option backward.isDefEq.respectTransparency false in
 instance [Tensorial S c M] : SMulCommClass k G M where
   smul_comm c g m := by
     apply toTensor.injective
     simp [toTensor_smul]
+
+instance [Tensorial S c M] : SMulCommClass G k M := SMulCommClass.symm _ _ _
 
 /-!
 
@@ -255,7 +251,6 @@ lemma toTensor_tprod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
 
 -/
 
-set_option backward.isDefEq.respectTransparency false in
 lemma smul_prod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
     [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂]
     [Tensorial S c2 M₂] (g : G) (m : M) (m2 : M₂) :
@@ -323,10 +318,11 @@ lemma prod_tensor_basis_eq_map_reindex {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Ty
 attribute [-simp] Matrix.cons_val_zero Matrix.cons_val Fin.succAbove_zero
 
 open Tensor in
+set_option backward.isDefEq.respectTransparency false in
 /-- Double basis expansion of an element of a tensor product `M ⊗[k] M₂` of two `Tensorial`
   one-index spaces. Given bases `b`, `b2` of `M`, `M₂` coming from the single-index tensor bases,
   every `x : M ⊗[k] M₂` is the double sum over `i, j` of the iterated evaluation coefficient
-  `toField (evalT 0 j (evalT 0 i (toTensor x)))` times `b i ⊗ₜ b2 j`. -/
+  `toScalar (evalT 0 j (evalT 0 i (toTensor x)))` times `b i ⊗ₜ b2 j`. -/
 lemma prod_eq_sum_eval {c c2 : C} {M₂ : Type}
     [Tensorial S ![c] M] [AddCommMonoid M₂] [Module k M₂]
     [Tensorial S ![c2] M₂] {b : Module.Basis (basisIdx c) k M}
@@ -334,7 +330,7 @@ lemma prod_eq_sum_eval {c c2 : C} {M₂ : Type}
     (h : b = ((Tensor.basis (S := S) ![c]).map toTensor.symm).reindex ComponentIdx.single)
     (h2 : b2 = ((Tensor.basis (S := S) ![c2]).map toTensor.symm).reindex ComponentIdx.single)
     (x : M ⊗[k] M₂) : x = ∑ i : (basisIdx c), ∑ j : (basisIdx c2),
-    toField (evalT 0 (basisIdxCongr (by rfl) j)
+    toScalar (evalT 0 (basisIdxCongr (by rfl) j)
       (evalT 0 (basisIdxCongr (by rfl) i) (toTensor x))) • b i ⊗ₜ[k] b2 j := by
   apply toTensor.injective
   conv_lhs => rw [eq_sum_evalT_zero (toTensor x)]

@@ -350,6 +350,7 @@ noncomputable def Commute.isSymmetric_directSumDecomposition  {𝕜 E : Type*} [
   · replace h₁ : eigenspace A fst = ⊥ := by simpa [Module.End.HasUnifEigenvalue] using h₁
     simp [h₁]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Similar to `LinearMap.IsSymmetric.directSum_isInternal_of_commute`, but here the direct sum
 is indexed by only the pairs of eigenvalues, as opposed to all pairs of `𝕜` values, giving a finite
 decomposition. -/
@@ -539,7 +540,7 @@ theorem star_shared_mul_A_mul_IsDiag : IsDiag
   · have := ( sharedEigenbasis hA hB hAB ).orthonormal;
     rw [ orthonormal_iff_ite ] at this;
     simp only [inner, ← starRingEnd_apply] at this
-    rw [ ← Finset.smul_sum, this i j, if_neg hij, smul_zero ]
+    rw [ ← Finset.smul_sum, this i j, ite_eq_right hij, smul_zero ]
 
 /-- Analogous to `Matrix.IsHermitian.star_mul_self_mul_eq_diagonal` for the shared basis. -/
 theorem star_shared_mul_B_mul_IsDiag : IsDiag

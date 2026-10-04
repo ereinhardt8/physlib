@@ -6,7 +6,7 @@ Authors: Alex Meiburg
 module
 
 public import QuantumInfo.ForMathlib.HermitianMat.Sqrt
-public import QuantumInfo.ForMathlib.HermitianMat.LiebConcavity
+public import QuantumInfo.ForMathlib.HermitianMat.Unitary
 
 @[expose] public section
 
@@ -105,6 +105,7 @@ theorem peierls_inequality_ici (A : HermitianMat d ℂ) (g : ℝ → ℝ) (hg : 
     exact fun j => Matrix.unitaryGroup_row_norm (H A).eigenvectorUnitary j
   simp_all [trace_cfc_eq]
 
+set_option backward.isDefEq.respectTransparency false in
 /--
 Joint convexity of the trace functional: for a convex function g,
 the map A ↦ tr(g(A)) is convex on the space of Hermitian matrices.
@@ -141,7 +142,7 @@ theorem trace_function_convex_univ (g : ℝ → ℝ) (hg : ConvexOn ℝ Set.univ
         simp_all [conj]
         convert congr_arg Complex.re ‹ (diagonal ℂ _) i i = _ › using 1
         · exact Eq.symm (by erw [show (diagonal ℂ _ : HermitianMat d ℂ) i i =
-            (C.H.eigenvalues i : ℂ) by exact if_pos rfl]; norm_cast)
+            (C.H.eigenvalues i : ℂ) by exact ite_eq_left rfl]; norm_cast)
         · norm_num [Complex.ext_iff]
       rw [h_eigenvalue]
       exact hg.2 trivial trivial ha hb hab
@@ -163,6 +164,7 @@ theorem trace_function_convex_univ (g : ℝ → ℝ) (hg : ConvexOn ℝ Set.univ
   simp_all only
   exact h1
 
+set_option backward.isDefEq.respectTransparency false in
 open ComplexOrder in
 /--
 Convexity of trace functions: if `g` is convex on `ℝ₊`, then `A ↦ Tr[g(A)]` is
@@ -200,7 +202,7 @@ theorem trace_function_convex_ici {g : ℝ → ℝ} (hg : ConvexOn ℝ (Set.Ici 
         simp_all [conj]
         convert congr_arg Complex.re h_eigenvalue using 1
         · exact Eq.symm (by erw [show (diagonal ℂ _ : HermitianMat d ℂ) i i =
-            (C.H.eigenvalues i : ℂ) by exact if_pos rfl]; norm_cast)
+            (C.H.eigenvalues i : ℂ) by exact ite_eq_left rfl]; norm_cast)
         · norm_num [Complex.ext_iff]
       rw [h_eigenvalue]
       refine hg.2 ?_ ?_ ha hb hab

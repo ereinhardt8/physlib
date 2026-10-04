@@ -9,11 +9,11 @@ public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.P
 /-!
 # Solutions from quad solutions
 
-We use $B-L$ to form a surjective map from quad solutions to solutions. The main reference
-for this material is:
+We use $B-L$ to form a surjective map from quad solutions to solutions.
 
-- https://arxiv.org/abs/2006.03588
+## References
 
+* The main reference for this material is https://arxiv.org/abs/2006.03588. [ref: arxiv_2006_03588]
 -/
 
 @[expose] public section
@@ -102,7 +102,7 @@ def quadSolToSolInv {n : ℕ} : (PlusU1 n).Sols → (PlusU1 n).QuadSols × ℚ �
 
 lemma quadSolToSolInv_1 (S : (PlusU1 n).Sols) :
     (quadSolToSolInv S).1 = S.1 := by
-  simp only [quadSolToSolInv, α₁, BL_val, SMνACCs.cubeTriLin_toFun_apply_apply, Fin.isValue,
+  simp only [quadSolToSolInv, α₁, BL_val,
     neg_mul, neg_eq_zero, mul_eq_zero, OfNat.ofNat_ne_zero, false_or]
   split <;> rfl
 
@@ -121,22 +121,22 @@ lemma quadSolToSolInv_special (S : (PlusU1 n).Sols) (h : α₁ S.1 = 0) :
     special (quadSolToSolInv S).1 (quadSolToSolInv S).2.1 (quadSolToSolInv S).2.2
     (quadSolToSolInv_α₁_α₂_zero S h).1 (quadSolToSolInv_α₁_α₂_zero S h).2 = S := by
   simp only [quadSolToSolInv_1]
-  rw [show (quadSolToSolInv S).2.1 = 1 by rw [quadSolToSolInv, if_pos h]]
-  rw [show (quadSolToSolInv S).2.2 = 0 by rw [quadSolToSolInv, if_pos h]]
+  rw [show (quadSolToSolInv S).2.1 = 1 by rw [quadSolToSolInv, ite_eq_left h]]
+  rw [show (quadSolToSolInv S).2.2 = 0 by rw [quadSolToSolInv, ite_eq_left h]]
   rw [special_on_AF]
 
 lemma quadSolToSolInv_generic (S : (PlusU1 n).Sols) (h : α₁ S.1 ≠ 0) :
     (quadSolToSolInv S).2.1 • generic (quadSolToSolInv S).1 = S := by
   simp only [quadSolToSolInv_1]
-  rw [show (quadSolToSolInv S).2.1 = (α₁ S.1)⁻¹ by rw [quadSolToSolInv, if_neg h]]
+  rw [show (quadSolToSolInv S).2.1 = (α₁ S.1)⁻¹ by rw [quadSolToSolInv, ite_eq_right h]]
   rw [generic_on_AF_α₁_ne_zero S h]
 
 lemma quadSolToSolInv_rightInverse : Function.RightInverse (@quadSolToSolInv n) quadSolToSol := by
   intro S
   by_cases h : α₁ S.1 = 0
-  · rw [quadSolToSol, dif_pos (quadSolToSolInv_α₁_α₂_zero S h)]
+  · rw [quadSolToSol, dite_eq_left (quadSolToSolInv_α₁_α₂_zero S h)]
     exact quadSolToSolInv_special S h
-  · rw [quadSolToSol, dif_neg (quadSolToSolInv_α₁_α₂_ne_zero S h)]
+  · rw [quadSolToSol, dite_eq_right (quadSolToSolInv_α₁_α₂_ne_zero S h)]
     exact quadSolToSolInv_generic S h
 
 theorem quadSolToSol_surjective : Function.Surjective (@quadSolToSol n) :=

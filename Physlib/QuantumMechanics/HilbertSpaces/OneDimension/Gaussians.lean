@@ -7,7 +7,6 @@ module
 
 public import Physlib.QuantumMechanics.HilbertSpaces.OneDimension.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
-public import Physlib.Meta.TODO.Basic
 /-!
 
 # Gaussians and the hilbert space
@@ -130,7 +129,7 @@ lemma mul_gaussian_mem_Lp_one (f : ℝ → ℂ) (hf : MemHS f) (b c : ℝ) (hb :
 
 lemma mul_gaussian_mem_Lp_two (f : ℝ → ℂ) (hf : MemHS f) (b c : ℝ) (hb : 0 < b) :
     MeasureTheory.MemLp (fun x => f x * Real.exp (- b * (x - c) ^ 2)) 2 volume := by
-  refine MeasureTheory.MemLp.mul ?_ hf (q := ⊤)
+  refine MeasureTheory.MemLp.fun_mul hf ?_ (q := ⊤)
   · apply MeasureTheory.memLp_top_of_bound (C := Real.exp (0))
     · exact gaussian_aestronglyMeasurable c hb
     · apply Filter.Eventually.of_forall

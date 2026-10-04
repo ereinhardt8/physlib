@@ -125,6 +125,38 @@ lemma tensor_basis_repr_toTensor_apply {d : ℕ} (p : Vector d) (μ : ComponentI
 
 /-!
 
+## Tensor products of vectors
+
+-/
+
+/-- Evaluating both indices of an element of `Vector d ⊗ Vector d` gives its coefficient
+  in the tensor-product basis. -/
+lemma toScalar_eval_eval_eq_tensorProduct_repr {d} (F : Vector d ⊗[ℝ] Vector d)
+    (μ ν : Fin 1 ⊕ Fin d) :
+    toScalar {F | [μ] [ν]}ᵀ = (basis.tensorProduct basis).repr F (μ, ν) := by
+  conv_rhs => rw [Tensorial.prod_eq_sum_eval basis_eq_map_tensor_basis basis_eq_map_tensor_basis F]
+  simp [-Fintype.sum_sum_type, Basis.tensorProduct_repr_tmul_apply, Finsupp.single_apply]
+  rfl
+
+/-- The coefficient of an element of `Vector d ⊗ Vector d` in the tensor basis is its
+  coefficient in the tensor-product basis. -/
+lemma tensor_basis_repr_toTensor_prod_apply {d} (F : Vector d ⊗[ℝ] Vector d)
+    (b : ComponentIdx (S := realLorentzTensor d) (Fin.append ![Color.up] ![Color.up])) :
+    (Tensor.basis _).repr (toTensor F) b = (basis.tensorProduct basis).repr F (b 0, b 1) := by
+  rw [Tensorial.basis_toTensor_apply, Tensorial.basis_map_prod]
+  simp only [Nat.reduceSucc, Nat.reduceAdd, Basis.repr_reindex, Fin.isValue]
+  rw [tensor_basis_map_eq_basis_reindex]
+  have hb : (((basis (d := d)).reindex indexEquiv.symm).tensorProduct
+      (basis.reindex indexEquiv.symm)) =
+      ((basis (d := d)).tensorProduct (basis (d := d))).reindex
+      (indexEquiv.symm.prodCongr indexEquiv.symm) := by
+    ext ⟨i, j⟩
+    simp
+  rw [hb, Finsupp.equivMapDomain_apply, Module.Basis.repr_reindex_apply]
+  congr 1
+
+/-!
+
 ## The action of the Lorentz group
 
 -/
@@ -161,18 +193,15 @@ lemma smul_eq_mulVec {d} (Λ : LorentzGroup d) (p : Vector d) :
 lemma smul_add {d : ℕ} (Λ : LorentzGroup d) (p q : Vector d) :
     Λ • (p + q) = Λ • p + Λ • q := by simp
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma smul_sub {d : ℕ} (Λ : LorentzGroup d) (p q : Vector d) :
     Λ • (p - q) = Λ • p - Λ • q := by
   rw [smul_eq_mulVec, smul_eq_mulVec, smul_eq_mulVec, Matrix.mulVec_sub]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma smul_zero {d : ℕ} (Λ : LorentzGroup d) :
     Λ • (0 : Vector d) = 0 := by
   rw [smul_eq_mulVec, Matrix.mulVec_zero]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma smul_neg {d : ℕ} (Λ : LorentzGroup d) (p : Vector d) :
     Λ • (-p) = - (Λ • p) := by
   rw [smul_eq_mulVec, smul_eq_mulVec, Matrix.mulVec_neg]
@@ -219,7 +248,6 @@ lemma actionCLM_surjective {d : ℕ} (Λ : LorentzGroup d) :
   use (actionCLM Λ⁻¹) x1
   simp [actionCLM_apply]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma smul_basis {d : ℕ} (Λ : LorentzGroup d) (μ : Fin 1 ⊕ Fin d) :
     Λ • basis μ = ∑ ν, Λ.1 ν μ • basis ν := by
   funext i

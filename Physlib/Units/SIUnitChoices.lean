@@ -23,9 +23,9 @@ The ISQ base quantities are length, mass, time, electric current, thermodynamic
 temperature, amount of substance and luminous intensity. Four of the corresponding typed
 unit types already exist (`LengthUnit`, `MassUnit`, `TimeUnit`, `TemperatureUnit`); the
 remaining three — `CurrentUnit`, `AmountUnit`, `LuminousIntensityUnit` — are introduced
-here. (They follow the `LengthUnit` convention of a positive-real magnitude; the full
-division/scaling API can be filled in later and, following PhysLib's layout, they would
-ultimately live under the relevant physics directories.)
+here. They follow the `LengthUnit` convention of a positive-real magnitude and support
+rescaling and unit-ratio laws through `PositiveRealUnitCore`. Following PhysLib's
+layout, these types may ultimately live under the relevant physics directories.
 
 `SIUnitChoices := UnitSystem ISQDimensionBase` is then the typed SI unit choice, and
 `SIUnitChoices.SI` is the coherent SI choice (metre, kilogram, second, ampere, kelvin,
@@ -53,24 +53,23 @@ structure CurrentUnit where
   val : ℝ
   property : 0 < val
 
+instance : PositiveRealUnitCore CurrentUnit where
+  val := CurrentUnit.val
+  pos := CurrentUnit.property
+  ofVal := fun r hr => ⟨r, hr⟩
+  val_ofVal := by intros; rfl
+  ofVal_val := by intro x; cases x; rfl
+
 namespace CurrentUnit
 
-@[simp]
-lemma val_ne_zero (x : CurrentUnit) : x.val ≠ 0 := Ne.symm (ne_of_lt x.property)
-
-lemma val_pos (x : CurrentUnit) : 0 < x.val := x.property
-
-instance : Inhabited CurrentUnit where
-  default := ⟨1, by norm_num⟩
-
-noncomputable instance : HDiv CurrentUnit CurrentUnit ℝ≥0 where
-  hDiv x t := ⟨x.val / t.val, div_nonneg x.val_pos.le t.val_pos.le⟩
-
-lemma div_eq_val (x y : CurrentUnit) :
-    x / y = (⟨x.val / y.val, div_nonneg x.val_pos.le y.val_pos.le⟩ : ℝ≥0) := rfl
+open PositiveRealUnitCore
 
 /-- The SI coherent unit of electric current, the ampere. -/
 def amperes : CurrentUnit := ⟨1, by norm_num⟩
+
+/-- One milliampere, equal to `10⁻³` amperes. -/
+noncomputable def milliamperes : CurrentUnit :=
+  scale ((1 / 10) ^ 3) amperes
 
 end CurrentUnit
 
@@ -81,21 +80,16 @@ structure AmountUnit where
   val : ℝ
   property : 0 < val
 
+instance : PositiveRealUnitCore AmountUnit where
+  val := AmountUnit.val
+  pos := AmountUnit.property
+  ofVal := fun r hr => ⟨r, hr⟩
+  val_ofVal := by intros; rfl
+  ofVal_val := by intro x; cases x; rfl
+
 namespace AmountUnit
 
-@[simp]
-lemma val_ne_zero (x : AmountUnit) : x.val ≠ 0 := Ne.symm (ne_of_lt x.property)
-
-lemma val_pos (x : AmountUnit) : 0 < x.val := x.property
-
-instance : Inhabited AmountUnit where
-  default := ⟨1, by norm_num⟩
-
-noncomputable instance : HDiv AmountUnit AmountUnit ℝ≥0 where
-  hDiv x t := ⟨x.val / t.val, div_nonneg x.val_pos.le t.val_pos.le⟩
-
-lemma div_eq_val (x y : AmountUnit) :
-    x / y = (⟨x.val / y.val, div_nonneg x.val_pos.le y.val_pos.le⟩ : ℝ≥0) := rfl
+open PositiveRealUnitCore
 
 /-- The SI coherent unit of amount of substance, the mole. -/
 def moles : AmountUnit := ⟨1, by norm_num⟩
@@ -109,21 +103,16 @@ structure LuminousIntensityUnit where
   val : ℝ
   property : 0 < val
 
+instance : PositiveRealUnitCore LuminousIntensityUnit where
+  val := LuminousIntensityUnit.val
+  pos := LuminousIntensityUnit.property
+  ofVal := fun r hr => ⟨r, hr⟩
+  val_ofVal := by intros; rfl
+  ofVal_val := by intro x; cases x; rfl
+
 namespace LuminousIntensityUnit
 
-@[simp]
-lemma val_ne_zero (x : LuminousIntensityUnit) : x.val ≠ 0 := Ne.symm (ne_of_lt x.property)
-
-lemma val_pos (x : LuminousIntensityUnit) : 0 < x.val := x.property
-
-instance : Inhabited LuminousIntensityUnit where
-  default := ⟨1, by norm_num⟩
-
-noncomputable instance : HDiv LuminousIntensityUnit LuminousIntensityUnit ℝ≥0 where
-  hDiv x t := ⟨x.val / t.val, div_nonneg x.val_pos.le t.val_pos.le⟩
-
-lemma div_eq_val (x y : LuminousIntensityUnit) :
-    x / y = (⟨x.val / y.val, div_nonneg x.val_pos.le y.val_pos.le⟩ : ℝ≥0) := rfl
+open PositiveRealUnitCore
 
 /-- The SI coherent unit of luminous intensity, the candela. -/
 def candelas : LuminousIntensityUnit := ⟨1, by norm_num⟩
@@ -151,11 +140,11 @@ noncomputable instance : UnitMagnitudeCatalog ISQDimensionBase where
   mag {b} :=
     match b with
     | .length | .mass | .time | .current | .temperature | .amount | .luminousIntensity =>
-        fun u => ⟨u.val, u.val_pos.le⟩
+        fun u => ⟨u.val, u.property.le⟩
   mag_pos {b} :=
     match b with
     | .length | .mass | .time | .current | .temperature | .amount | .luminousIntensity =>
-        fun u => NNReal.coe_pos.mp u.val_pos
+        fun u => NNReal.coe_pos.mp u.property
 
 /-!
 

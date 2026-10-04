@@ -119,6 +119,7 @@ lemma congrLift_bijective {n m : ℕ} {c : WickContraction n} (h : n = m) :
 def congrLiftInv {n m : ℕ} (h : n = m) {c : WickContraction n} (a : (congr h c).1) : c.1 :=
   ⟨a.1.map (finCongr h.symm).toEmbedding, by aesop⟩
 
+set_option backward.isDefEq.respectTransparency false in
 lemma congrLiftInv_rfl {n : ℕ} {c : WickContraction n} :
     c.congrLiftInv rfl = id := by
   funext a
@@ -341,7 +342,7 @@ def contractEquivFinTwo (c : WickContraction n) (a : c.1) :
     · rw [hi]
       simp only [↓reduceIte, Fin.isValue]
       exact Subtype.ext hi.symm
-    · rw [hi, if_neg]
+    · rw [hi, ite_eq_right]
       · exact Subtype.ext hi.symm
       · exact Ne.symm <| fstFieldOfContract_ne_sndFieldOfContract c a
   right_inv i := by

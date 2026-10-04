@@ -5,7 +5,6 @@ Authors: Adam Bornemann, Gregory J. Loges
 -/
 module
 
-public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
 public import Physlib.QuantumMechanics.HilbertSpaces.SpaceD.Basic
 /-!
 
@@ -36,6 +35,7 @@ submodule into itself. It also is a convenient dense domain on which to define d
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section
@@ -82,6 +82,7 @@ variable (f g : 𝓢(Space d, ℂ)) (ψ : SchwartzSubmodule d μ)
 
 instance : CoeFun (SchwartzSubmodule d μ) fun _ ↦ Space d → ℂ := ⟨fun ψ ↦ ψ.val⟩
 
+set_option backward.isDefEq.respectTransparency false in
 lemma schwartzEquiv_apply_coe : ↑(schwartzEquiv μ f) = schwartzIncl μ f := by simp [schwartzEquiv]
 
 lemma schwartzEquiv_coe_ae : schwartzEquiv μ f =ᵐ[μ] f := coeFn_toLp f 2 μ

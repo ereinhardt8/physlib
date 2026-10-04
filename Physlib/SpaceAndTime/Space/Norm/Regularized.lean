@@ -5,8 +5,7 @@ Authors: Gregory J. Loges
 -/
 module
 
-public import Physlib.SpaceAndTime.Space.Derivatives.Basic
-public import Physlib.SpaceAndTime.Space.Integrals.NormPow
+public import Physlib.SpaceAndTime.Space.Module
 /-!
 
 # Regularized powers of the norm on space
@@ -29,6 +28,7 @@ This file contains basic API for regularized powers of the norm on `Space d`, na
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section

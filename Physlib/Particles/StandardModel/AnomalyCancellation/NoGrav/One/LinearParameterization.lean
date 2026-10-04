@@ -14,8 +14,10 @@ In this file we give two parameterizations
 - `linearParameters` of solutions to the linear ACCs for 1 family
 - `linearParametersQENeqZero` of solutions to the linear ACCs for 1 family with Q and E non-zero
 
-These parameterizations are based on:
-https://arxiv.org/abs/1907.00514
+## References
+
+* These parameterizations are based on https://arxiv.org/abs/1907.00514.
+  [ref: Lohitsiri:2019fuu]
 -/
 
 @[expose] public section
@@ -66,6 +68,7 @@ lemma speciesVal (S : linearParameters) :
   | 3 => rfl
   | 4 => rfl
 
+set_option backward.isDefEq.respectTransparency false in
 lemma toSpecies_apply_asCharges (S : linearParameters) (i : Fin 5) :
     toSpecies i S.asCharges = fun _ => S.asCharges i := by
   funext j

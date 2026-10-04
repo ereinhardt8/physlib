@@ -7,8 +7,6 @@ module
 
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Basic
 public import Physlib.SpaceAndTime.Time.Derivatives
-public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
-public import Mathlib.Geometry.Manifold.MFDeriv.Basic
 /-!
 # Geometric trajectories of the harmonic oscillator
 
@@ -40,8 +38,8 @@ trajectory be tested as ordinary smoothness of its coordinate curve.
 
 ## iv. References
 
-- Ivo Terek, Introductory Variational Calculus on Manifolds, pages 1-2 (Section 1, Basic
-  definitions and examples).
+* Ivo Terek, Introductory Variational Calculus on Manifolds, pages 1-2 (Section 1, Basic definitions
+  and examples). [ref: terek_variational_manifolds]
 -/
 
 @[expose] public section

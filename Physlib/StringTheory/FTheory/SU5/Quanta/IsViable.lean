@@ -55,8 +55,8 @@ lake exe graph --from
 
 ## iv. References
 
-The key reference for the material in this module is: arXiv:1507.05961.
-
+* Froggatt-Nielsen meets Mordell-Weil: A Phenomenological Survey of Global F-theory GUTs
+  with U(1)s (arxiv:1507.05961). [ref: arxiv_1507_05961]
 -/
 
 @[expose] public section

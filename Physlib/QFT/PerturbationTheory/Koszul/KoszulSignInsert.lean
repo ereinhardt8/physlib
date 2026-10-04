@@ -5,7 +5,7 @@ Authors: Joseph Tooby-Smith
 -/
 module
 public import Physlib.QFT.PerturbationTheory.FieldStatistics.ExchangeSign
-public import Physlib.Mathematics.List
+public import Physlib.Mathematics.ForMathlib.List
 import all Mathlib.Data.List.Sort
 /-!
 
@@ -76,8 +76,8 @@ lemma koszulSignInsert_ge_forall_append (φs : List 𝓕) (φ' φ : 𝓕) (hi : 
   | cons φ'' φs ih =>
     simp only [koszulSignInsert, List.cons_append]
     by_cases hr : le φ' φ''
-    · rw [if_pos hr, if_pos hr, ih]
-    · rw [if_neg hr, if_neg hr, ih]
+    · rw [ite_eq_left hr, ite_eq_left hr, ih]
+    · rw [ite_eq_right hr, ite_eq_right hr, ih]
 
 lemma koszulSignInsert_eq_filter (φ : 𝓕) : (φs : List 𝓕) →
     koszulSignInsert q le φ φs =
@@ -107,6 +107,7 @@ lemma koszulSignInsert_eq_cons [Std.Total le] (φ : 𝓕) (φs : List 𝓕) :
     simpa only [or_self] using Std.Total.total (r := le) φ φ
   simp [h1]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma koszulSignInsert_eq_grade (φ : 𝓕) (φs : List 𝓕) :
     koszulSignInsert q le φ φs = if ofList q [φ] = fermionic ∧
     ofList q (List.filter (fun i => decide (¬ le φ i)) φs) = fermionic then -1 else 1 := by
@@ -118,7 +119,7 @@ lemma koszulSignInsert_eq_grade (φ : 𝓕) (φs : List 𝓕) :
     by_cases hr1 : ¬ le φ φ1
     · rw [List.filter_cons_of_pos]
       · dsimp only [koszulSignInsert, Fin.isValue, decide_not]
-        rw [if_neg hr1]
+        rw [ite_eq_right hr1]
         dsimp only [Fin.isValue, ofList, ite_eq_right_iff, zero_ne_one, imp_false, decide_not]
         simp only [decide_not, ite_eq_right_iff, reduceCtorEq, imp_false]
         have ha (a b c : FieldStatistic) : (if a = fermionic ∧ b = fermionic then -if ¬a = bosonic ∧
@@ -245,7 +246,7 @@ lemma koszulSignInsert_of_le_mem (φ0 : 𝓕) : (φs : List 𝓕) → (h : ∀ b
     simp [koszulSignInsert]
   | φ1 :: φs, h => by
     simp only [koszulSignInsert]
-    rw [if_pos]
+    rw [ite_eq_left]
     · apply koszulSignInsert_of_le_mem
       · intro b hb
         exact h b (List.mem_cons_of_mem _ hb)

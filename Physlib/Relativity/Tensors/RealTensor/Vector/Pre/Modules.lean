@@ -43,20 +43,24 @@ lemma ext {ψ ψ' : ContrMod d} (h : ψ.val = ψ'.val) : ψ = ψ' := by
   subst h
   rfl
 
-/-- The equivalence between `ContrℝModule` and `Fin 1 ⊕ Fin d → ℂ`. -/
+/-- The equivalence between `ContrMod` and `Fin 1 ⊕ Fin d → ℝ`. -/
 def toFin1dℝFun : ContrMod d ≃ (Fin 1 ⊕ Fin d → ℝ) where
   toFun v := v.val
   invFun f := ⟨f⟩
   left_inv _ := rfl
   right_inv _ := rfl
 
-/-- The instance of `AddCommGroup` on `ContrℝModule` defined via its equivalence
+/-- The instance of `AddCommGroup` on `ContrMod` defined via its equivalence
   with `Fin 1 ⊕ Fin d → ℝ`. -/
 instance : AddCommGroup (ContrMod d) := Equiv.addCommGroup toFin1dℝFun
 
-/-- The instance of `Module` on `ContrℝModule` defined via its equivalence
+/-- The additive equivalence between `ContrMod` and `Fin 1 ⊕ Fin d → ℝ`. -/
+def toFin1dℝAddEquiv : ContrMod d ≃+ (Fin 1 ⊕ Fin d → ℝ) :=
+  { toFin1dℝFun with map_add' _ _ := rfl }
+
+/-- The instance of `Module` on `ContrMod` defined via its equivalence
   with `Fin 1 ⊕ Fin d → ℝ`. -/
-instance : Module ℝ (ContrMod d) := Equiv.module ℝ toFin1dℝFun
+instance : Module ℝ (ContrMod d) := AddEquiv.module ℝ toFin1dℝAddEquiv
 
 @[simp]
 lemma val_add (ψ ψ' : ContrMod d) : (ψ + ψ').val = ψ.val + ψ'.val := rfl
@@ -64,11 +68,11 @@ lemma val_add (ψ ψ' : ContrMod d) : (ψ + ψ').val = ψ.val + ψ'.val := rfl
 @[simp]
 lemma val_smul (r : ℝ) (ψ : ContrMod d) : (r • ψ).val = r • ψ.val := rfl
 
-/-- The linear equivalence between `ContrℝModule` and `(Fin 1 ⊕ Fin d → ℝ)`. -/
+/-- The linear equivalence between `ContrMod` and `(Fin 1 ⊕ Fin d → ℝ)`. -/
 def toFin1dℝEquiv : ContrMod d ≃ₗ[ℝ] (Fin 1 ⊕ Fin d → ℝ) :=
-  Equiv.linearEquiv ℝ toFin1dℝFun
+  AddEquiv.linearEquiv ℝ toFin1dℝAddEquiv
 
-/-- The underlying element of `Fin 1 ⊕ Fin d → ℝ` of a element in `ContrℝModule` defined
+/-- The underlying element of `Fin 1 ⊕ Fin d → ℝ` of a element in `ContrMod` defined
   through the linear equivalence `toFin1dℝEquiv`. -/
 abbrev toFin1dℝ (ψ : ContrMod d) := toFin1dℝEquiv ψ
 
@@ -79,7 +83,7 @@ lemma toFin1dℝ_eq_val (ψ : ContrMod d) : ψ.toFin1dℝ = ψ.val := by rfl
 
 -/
 
-/-- The standard basis of `ContrℝModule` indexed by `Fin 1 ⊕ Fin d`. -/
+/-- The standard basis of `ContrMod` indexed by `Fin 1 ⊕ Fin d`. -/
 def stdBasis : Basis (Fin 1 ⊕ Fin d) ℝ (ContrMod d) := Basis.ofEquivFun toFin1dℝEquiv
 
 @[simp]
@@ -173,7 +177,7 @@ lemma mulVec_mulVec (M N : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : 
 
 ## The norm
 
-(Not the Minkowski norm, but the norm of a vector in `ContrℝModule d`.)
+(Not the Minkowski norm, but the norm of a vector in `ContrMod d`.)
 -/
 
 /-- A `NormedAddCommGroup` structure on `ContrMod`. This is not an instance, as we
@@ -197,7 +201,7 @@ def toSpace (v : ContrMod d) : EuclideanSpace ℝ (Fin d) := WithLp.toLp 2 (v.va
 
 -/
 
-/-- The representation of the Lorentz group acting on `ContrℝModule d`. -/
+/-- The representation of the Lorentz group acting on `ContrMod d`. -/
 def rep : Representation ℝ (LorentzGroup d) (ContrMod d) where
   toFun g := Matrix.toLinAlgEquiv stdBasis g
   map_one' := EmbeddingLike.map_eq_one_iff.mpr rfl
@@ -327,13 +331,17 @@ def toFin1dℝFun : CoMod d ≃ (Fin 1 ⊕ Fin d → ℝ) where
   with `Fin 1 ⊕ Fin d → ℝ`. -/
 instance : AddCommGroup (CoMod d) := Equiv.addCommGroup toFin1dℝFun
 
+/-- The additive equivalence between `CoℝModule` and `Fin 1 ⊕ Fin d → ℝ`. -/
+def toFin1dℝAddEquiv : CoMod d ≃+ (Fin 1 ⊕ Fin d → ℝ) :=
+  { toFin1dℝFun with map_add' _ _ := rfl }
+
 /-- The instance of `Module` on `CoℝModule` defined via its equivalence
   with `Fin 1 ⊕ Fin d → ℝ`. -/
-instance : Module ℝ (CoMod d) := Equiv.module ℝ toFin1dℝFun
+instance : Module ℝ (CoMod d) := AddEquiv.module ℝ toFin1dℝAddEquiv
 
 /-- The linear equivalence between `CoℝModule` and `(Fin 1 ⊕ Fin d → ℝ)`. -/
 def toFin1dℝEquiv : CoMod d ≃ₗ[ℝ] (Fin 1 ⊕ Fin d → ℝ) :=
-  Equiv.linearEquiv ℝ toFin1dℝFun
+  AddEquiv.linearEquiv ℝ toFin1dℝAddEquiv
 
 /-- The underlying element of `Fin 1 ⊕ Fin d → ℝ` of a element in `CoℝModule` defined
   through the linear equivalence `toFin1dℝEquiv`. -/

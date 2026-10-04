@@ -144,11 +144,11 @@ lemma S₁₂_of_Vub_one {V : Quotient CKMMatrixSetoid} (ha : VubAbs V = 1) : S�
 lemma S₁₃_of_Vub_one {V : Quotient CKMMatrixSetoid} (ha : VubAbs V = 1) : S₁₃ V = 1 := ha
 
 lemma S₂₃_of_Vub_eq_one {V : Quotient CKMMatrixSetoid} (ha : VubAbs V = 1) : S₂₃ V = VcdAbs V := by
-  rw [S₂₃, if_pos ha]
+  rw [S₂₃, ite_eq_left ha]
 
 lemma S₂₃_of_Vub_ne_one {V : Quotient CKMMatrixSetoid} (ha : VubAbs V ≠ 1) :
     S₂₃ V = VcbAbs V / √ (VudAbs V ^ 2 + VusAbs V ^ 2) := by
-  rw [S₂₃, if_neg ha]
+  rw [S₂₃, ite_eq_right ha]
 
 end sines
 
@@ -319,6 +319,7 @@ lemma mulExpδ₁₃_on_param_ne_zero_arg (V : CKMMatrix) (δ₁₃ : ℝ)
     simpa only [ne_eq, ofReal_eq_zero, norm_eq_zero] using h1
   rw [← mul_right_inj' habs_ne_zero, ← h2]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma on_param_cos_θ₁₃_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.cos (θ₁₃ ⟦V⟧) = 0) :
     standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) δ₁₃ ≈ standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) 0 := by
   have hub := VubAbs_of_cos_θ₁₃_zero h
@@ -329,6 +330,7 @@ lemma on_param_cos_θ₁₃_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.c
       Fin.sum_univ_three, ofReal_cos, ofReal_sin, S₁₃_eq_ℂsin_θ₁₃, C₁₂_eq_ℂcos_θ₁₂,
       S₁₂_eq_ℂsin_θ₁₂, S₁₃_of_Vub_one hub, C₁₂_of_Vub_one hub, S₁₂_of_Vub_one hub, h, exp_neg]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma on_param_cos_θ₁₂_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.cos (θ₁₂ ⟦V⟧) = 0) :
     standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) δ₁₃ ≈ standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) 0 := by
   use 0, δ₁₃, δ₁₃, -δ₁₃, 0, - δ₁₃
@@ -338,6 +340,7 @@ lemma on_param_cos_θ₁₂_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.c
       Fin.sum_univ_three, h, exp_neg] <;>
     field_simp
 
+set_option backward.isDefEq.respectTransparency false in
 lemma on_param_cos_θ₂₃_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.cos (θ₂₃ ⟦V⟧) = 0) :
     standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) δ₁₃ ≈ standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) 0 := by
   use 0, δ₁₃, 0, 0, 0, - δ₁₃
@@ -347,6 +350,7 @@ lemma on_param_cos_θ₂₃_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.c
       Fin.sum_univ_three, h, exp_neg] <;>
     field_simp
 
+set_option backward.isDefEq.respectTransparency false in
 lemma on_param_sin_θ₁₃_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.sin (θ₁₃ ⟦V⟧) = 0) :
     standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) δ₁₃ ≈ standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) 0 := by
   use 0, 0, 0, 0, 0, 0
@@ -355,6 +359,7 @@ lemma on_param_sin_θ₁₃_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.s
     simp [standParam, standParamAsMatrix, phaseShift, phaseShiftMatrix, mul_apply,
       Fin.sum_univ_three, h, exp_neg]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma on_param_sin_θ₁₂_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.sin (θ₁₂ ⟦V⟧) = 0) :
     standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) δ₁₃ ≈ standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) 0 := by
   use 0, δ₁₃, δ₁₃, 0, -δ₁₃, - δ₁₃
@@ -364,6 +369,7 @@ lemma on_param_sin_θ₁₂_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.s
       Fin.sum_univ_three, h, exp_neg] <;>
     field_simp
 
+set_option backward.isDefEq.respectTransparency false in
 lemma on_param_sin_θ₂₃_eq_zero {V : CKMMatrix} (δ₁₃ : ℝ) (h : Real.sin (θ₂₃ ⟦V⟧) = 0) :
     standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) δ₁₃ ≈ standParam (θ₁₂ ⟦V⟧) (θ₁₃ ⟦V⟧) (θ₂₃ ⟦V⟧) 0 := by
   use 0, 0, δ₁₃, 0, 0, - δ₁₃

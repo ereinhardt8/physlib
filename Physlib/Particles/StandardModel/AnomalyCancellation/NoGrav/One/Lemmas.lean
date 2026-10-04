@@ -10,9 +10,13 @@ public import Physlib.Particles.StandardModel.AnomalyCancellation.NoGrav.One.Lin
 # Lemmas for 1 family SM Accs
 
 The main result of this file is the conclusion of this paper:
-  [Lohitsiri and Tong][Lohitsiri:2019fuu]
+  [Lohitsiri and Tong][Lohitsiri:2019fuu] [ref: Lohitsiri:2019fuu]
 
 That every solution to the ACCs without gravity satisfies for free the gravitational anomaly.
+
+## References
+
+* The main result of this file is the conclusion of this paper. [ref: Lohitsiri:2019fuu]
 -/
 
 @[expose] public section
@@ -36,6 +40,7 @@ lemma E_zero_iff_Q_zero {S : (SMNoGrav 1).Sols} : Q S.val (0 : Fin 1) = 0 ↔
   rw [← hS'] at hC
   exact ⟨S'.cubic_zero_Q'_zero hC, S'.cubic_zero_E'_zero hC⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- For a set of 1-family SM charges satisfying all ACCs except the gravitational,
   if the `Q` charge is zero then the charges satisfy the gravitational ACCs. -/
 lemma accGrav_Q_zero {S : (SMNoGrav 1).Sols} (hQ : Q S.val (0 : Fin 1) = 0) :

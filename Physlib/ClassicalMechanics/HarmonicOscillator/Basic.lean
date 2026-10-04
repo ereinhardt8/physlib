@@ -7,6 +7,7 @@ module
 
 public import Physlib.ClassicalMechanics.EulerLagrange
 public import Physlib.ClassicalMechanics.HamiltonsEquations
+public import Physlib.Mathematics.Calculus.Gradient
 public import Mathlib.Algebra.Order.Archimedean.Real.Hom
 /-!
 
@@ -84,8 +85,13 @@ In the `Solution` module:
 ## iv. References
 
 References for the classical harmonic oscillator include:
-- Landau & Lifshitz, Mechanics, page 58, section 21.
 
+* Landau & Lifshitz, Mechanics, page 58, section 21. [ref: landau_mechanics]
+
+A reference for the geometric model of position/velocity discussed in a TODO below:
+
+* https://web.williams.edu/Mathematics/it3/texts/var_noether.pdf.
+  [ref: terek_variational_manifolds]
 -/
 
 @[expose] public section
@@ -99,7 +105,7 @@ TODO "Create a new file for the geometric model which properly models the positi
     configuration space and velocity as its tangent space, then show explicitly how this
     coordinate model is a simplification of the geometric model.
     A nice reference for such an analysis is:
-    https://web.williams.edu/Mathematics/it3/texts/var_noether.pdf"
+    https://web.williams.edu/Mathematics/it3/texts/var_noether.pdf [ref: terek_variational_manifolds]"
 
 /-!
 
@@ -337,25 +343,6 @@ lemma contDiff_lagrangian (n : WithTop ℕ∞) : ContDiff ℝ n ↿S.lagrangian 
   rw [lagrangian_eq]
   fun_prop
 
-lemma toDual_symm_innerSL (x : EuclideanSpace ℝ (Fin 1)) :
-    (InnerProductSpace.toDual ℝ (EuclideanSpace ℝ (Fin 1))).symm (innerSL ℝ x) = x :=
-  (InnerProductSpace.toDual ℝ (EuclideanSpace ℝ (Fin 1))).symm_apply_apply x
-
-lemma gradient_inner_self (x : EuclideanSpace ℝ (Fin 1)) :
-    gradient (fun y : EuclideanSpace ℝ (Fin 1) => ⟪y, y⟫_ℝ) x = (2 : ℝ) • x := by
-  refine ext_inner_right (𝕜 := ℝ) fun y => ?_
-  unfold gradient
-  rw [InnerProductSpace.toDual_symm_apply,
-    fderiv_inner_apply (𝕜 := ℝ) differentiableAt_fun_id differentiableAt_fun_id]
-  simp [real_inner_comm, inner_smul_right, two_mul]
-
-lemma gradient_const_mul_inner_self (c : ℝ) (x : EuclideanSpace ℝ (Fin 1)) :
-    gradient (fun y : EuclideanSpace ℝ (Fin 1) => c * ⟪y, y⟫_ℝ) x = (2 * c) • x := by
-  unfold gradient
-  rw [fderiv_const_mul (by fun_prop) c, map_smul]
-  show c • gradient (fun y : EuclideanSpace ℝ (Fin 1) => ⟪y, y⟫_ℝ) x = (2 * c) • x
-  rw [gradient_inner_self, smul_smul, mul_comm]
-
 /-!
 
 #### D.1.3. Gradients of the lagrangian
@@ -365,18 +352,13 @@ position and velocity.
 
 -/
 
-private lemma gradient_add_const' {f : EuclideanSpace ℝ (Fin 1) → ℝ} {c : ℝ}
-    (x : EuclideanSpace ℝ (Fin 1)) :
-    gradient (fun y => f y + c) x = gradient f x :=
-  congrArg (InnerProductSpace.toDual ℝ (EuclideanSpace ℝ (Fin 1))).symm (fderiv_add_const c)
-
 lemma gradient_lagrangian_position_eq (t : Time) (x : EuclideanSpace ℝ (Fin 1))
     (v : EuclideanSpace ℝ (Fin 1)) :
     gradient (fun x => lagrangian S t x v) x = - S.k • x := by
   have h_eq : (fun y : EuclideanSpace ℝ (Fin 1) => lagrangian S t y v) =
       fun y => (-(1 / (2 : ℝ)) * S.k) * ⟪y, y⟫_ℝ + (1 / (2 : ℝ) * S.m * ⟪v, v⟫_ℝ) := by
     funext y; simp only [lagrangian_eq]; ring
-  rw [h_eq, gradient_add_const', gradient_const_mul_inner_self]
+  rw [h_eq, gradient_add_const, gradient_const_mul_inner_self]
   module
 
 lemma gradient_lagrangian_velocity_eq (t : Time) (x : EuclideanSpace ℝ (Fin 1))
@@ -386,7 +368,7 @@ lemma gradient_lagrangian_velocity_eq (t : Time) (x : EuclideanSpace ℝ (Fin 1)
       fun y => ((1 / (2 : ℝ)) * S.m) * ⟪y, y⟫_ℝ + (-(1 / (2 : ℝ)) * S.k * ⟪x, x⟫_ℝ) := by
     funext y; simp only [lagrangian_eq]; ring
   change gradient (fun y : EuclideanSpace ℝ (Fin 1) => lagrangian S t x y) v = S.m • v
-  rw [h_eq, gradient_add_const', gradient_const_mul_inner_self]
+  rw [h_eq, gradient_add_const, gradient_const_mul_inner_self]
   module
 
 /-!
@@ -679,7 +661,7 @@ lemma gradient_hamiltonian_position_eq (t : Time) (x : EuclideanSpace ℝ (Fin 1
     simp only [hamiltonian_eq]
     ring
   change gradient (fun y : EuclideanSpace ℝ (Fin 1) => hamiltonian S t p y) x = S.k • x
-  rw [h_eq, gradient_add_const', gradient_const_mul_inner_self]
+  rw [h_eq, gradient_add_const, gradient_const_mul_inner_self]
   module
 
 lemma gradient_hamiltonian_momentum_eq (t : Time) (x : EuclideanSpace ℝ (Fin 1))
@@ -691,7 +673,7 @@ lemma gradient_hamiltonian_momentum_eq (t : Time) (x : EuclideanSpace ℝ (Fin 1
     funext y
     simp only [hamiltonian_eq]
   change gradient (fun y : EuclideanSpace ℝ (Fin 1) => hamiltonian S t y x) p = (1 / S.m) • p
-  rw [h_eq, gradient_add_const', gradient_const_mul_inner_self]
+  rw [h_eq, gradient_add_const, gradient_const_mul_inner_self]
   module
 
 /-!
@@ -765,11 +747,11 @@ lemma equationOfMotion_tfae (xₜ : Time → EuclideanSpace ℝ (Fin 1)) (hx : C
         ∫ t, ⟪(pq' t).1, ∂ₜ (Prod.snd ∘ pq') t⟫_ℝ - S.hamiltonian t (pq' t).1 (pq' t).2) = 0] := by
   rw [← equationOfMotion_iff_hamiltonEqOp_eq_zero, ← equationOfMotion_iff_newtons_2nd_law]
   rw [hamiltons_equations_varGradient, euler_lagrange_varGradient]
-  simp only [List.tfae_cons_self]
+  simp only [List.tfae_cons_of_mem, List.mem_cons_self]
   rw [← gradLagrangian_eq_eulerLagrangeOp, ← equationOfMotion_iff_gradLagrangian_zero]
-  simp only [List.tfae_cons_self]
+  simp only [List.tfae_cons_of_mem, List.mem_cons_self]
   erw [← equationOfMotion_iff_hamiltonEqOp_eq_zero]
-  simp only [List.tfae_cons_self, List.tfae_singleton]
+  simp only [List.tfae_cons_of_mem, List.mem_cons_self, List.tfae_singleton]
   repeat fun_prop
   simp [toCanonicalMomentum_eq]
   repeat fun_prop

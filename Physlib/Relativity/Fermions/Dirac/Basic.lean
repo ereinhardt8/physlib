@@ -6,9 +6,8 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.Fermions.Weyl.LeftHanded
-public import Physlib.Relativity.Fermions.Weyl.RightHanded
-public import Physlib.Relativity.Fermions.Weyl.DualLeftHanded
 public import Physlib.Relativity.Fermions.Weyl.DualRightHanded
+public import Mathlib.RepresentationTheory.Intertwining
 /-!
 
 # Dirac fermions
@@ -16,11 +15,12 @@ public import Physlib.Relativity.Fermions.Weyl.DualRightHanded
 In this file we define Dirac fermions.
 This corresponds to a combination of two Weyl fermions (ψ^α, χ_{dot α})
 That is a LeftHandedWeyl and a DualRightHandedWeyl.
+The algebra equivalence `Dirac.endEquivMatrix` expresses their endomorphisms
+as matrices in the Dirac representation, using an explicit change from the chiral basis.
 
 ## References
 
-- arXiv:0812.1594 page 197.
-
+* arXiv:0812.1594 page 197. [ref: Dreiner:2008tw]
 -/
 
 @[expose] public section
@@ -62,7 +62,7 @@ def decomposeEquiv : Dirac ≃ LeftHandedWeyl × DualRightHandedWeyl where
 
 instance : AddCommGroup Dirac := Equiv.addCommGroup decomposeEquiv
 
-instance : Module ℂ Dirac := Equiv.module ℂ decomposeEquiv
+instance : Module ℂ Dirac := AddEquiv.module ℂ { decomposeEquiv with map_add' _ _ := rfl }
 
 @[simp]
 lemma left_add (d₁ d₂ : Dirac) : (d₁ + d₂).left = d₁.left + d₂.left := rfl
@@ -110,6 +110,36 @@ lemma chiralBasis_nat_add (i : Fin 2) : chiralBasis (Fin.natAdd 2 i) =
     simp only [chiralBasis, Nat.reduceAdd, Basis.map_apply, Basis.coe_reindex,
     Function.comp_apply, Basis.prod_apply, LinearMap.coe_inl, LinearMap.coe_inr]
     rfl
+
+/-- Dirac endomorphisms as matrices in the Dirac representation. The change of coordinates
+from the chiral representation is `S = [1, 1; -1, 1]`, with `2 × 2` blocks, so this map sends
+`f` to `S [f] S⁻¹`. The common normalization factor `1 / √2` cancels in conjugation. -/
+def endEquivMatrix : Module.End ℂ Dirac ≃ₐ[ℂ] Matrix (Fin 4) (Fin 4) ℂ :=
+  (LinearEquiv.conjAlgEquiv ℂ
+    (Matrix.toLinOfInv chiralBasis chiralBasis
+      (M := !![1, 0, 1, 0; 0, 1, 0, 1; -1, 0, 1, 0; 0, -1, 0, 1])
+      (M' := (2 : ℂ)⁻¹ • !![1, 0, -1, 0; 0, 1, 0, -1; 1, 0, 1, 0; 0, 1, 0, 1])
+      (by ext i j; fin_cases i <;> fin_cases j <;>
+          norm_num [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.one_apply])
+      (by ext i j; fin_cases i <;> fin_cases j <;>
+          norm_num [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.one_apply]))).trans
+    (LinearMap.toMatrixAlgEquiv chiralBasis)
+
+/-- The change of coordinates from the chiral representation to the Dirac representation. -/
+lemma endEquivMatrix_apply (f : Module.End ℂ Dirac) :
+    endEquivMatrix f =
+      !![1, 0, 1, 0; 0, 1, 0, 1; -1, 0, 1, 0; 0, -1, 0, 1] *
+        LinearMap.toMatrix chiralBasis chiralBasis f *
+        ((2 : ℂ)⁻¹ • !![1, 0, -1, 0; 0, 1, 0, -1; 1, 0, 1, 0; 0, 1, 0, 1]) := by
+  simp only [endEquivMatrix, AlgEquiv.trans_apply, LinearEquiv.conjAlgEquiv_apply,
+    LinearMap.toMatrixAlgEquiv, AlgEquiv.ofLinearEquiv_apply]
+  simp only [Matrix.toLinOfInv, LinearEquiv.symm_mk]
+  simp only [LinearMap.toMatrix_comp chiralBasis chiralBasis chiralBasis,
+    Matrix.mul_assoc]
+  apply congrArg₂ (· * ·)
+  · exact LinearMap.toMatrix_toLin chiralBasis chiralBasis _
+  · apply congrArg _
+    exact LinearMap.toMatrix_toLin chiralBasis chiralBasis _
 
 /-!
 

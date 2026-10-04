@@ -6,12 +6,10 @@ Authors: Alex Meiburg, Leonardo A. Lessa, Rodolfo R. Soldati
 module
 
 public import Mathlib.Algebra.Module.Submodule.Lattice
-public import Mathlib.Analysis.Subadditive
 public import Mathlib.CategoryTheory.Functor.FullyFaithful
 public import Mathlib.CategoryTheory.Monoidal.Braided.Basic
 public import Mathlib.Data.EReal.Basic
 public import QuantumInfo.Entropy.VonNeumann
-public import QuantumInfo.Entropy.SSA
 public import QuantumInfo.Entropy.Relative
 public import QuantumInfo.Entropy.DPI
 public import QuantumInfo.Channels.Bundled
@@ -20,6 +18,8 @@ public import QuantumInfo.Channels.Dual
 public import QuantumInfo.Channels.MatrixMap
 public import QuantumInfo.Channels.Unbundled
 public import QuantumInfo.Measurements.POVM
+public import QuantumInfo.ForMathlib.ContinuousSup
+public import Mathlib.Topology.Compactification.OnePoint.ProjectiveLine
 
 /-!
 Defines `OptimalHypothesisRate`, the optimal rate of distinguishing an `MState` ρ from a set of other
@@ -456,18 +456,18 @@ theorem Ref81Lem5 (ρ σ : MState d) (ε : Prob) (hε : ε < 1) (α : ℝ) (hα 
 
 
   --The Renyi entropy is finite
-  rw [SandwichedRelRentropy, dif_pos (zero_lt_one.trans hα), dif_pos ?_]; swap
+  rw [SandwichedRelRentropy, dite_eq_left (zero_lt_one.trans hα), dite_eq_left ?_]; swap
   · suffices q2.M.ker = ⊥ by
       simp only [this, bot_le]
     --q2 has eigenvalues β_ ε(ρ‖{σ}) and 1-β_ ε(ρ‖{σ}), so as long as β_ ε(ρ‖{σ}) isn't 0 or 1,
     --this is true.
     exact ker_diagonal_prob_eq_bot hq hq₂
 
-  conv => enter [2, 1, 1, 1]; rw [if_neg hα.ne']
+  conv => enter [2, 1, 1, 1]; rw [ite_eq_right hα.ne']
 
   --The logs are finite
-  rw [Prob.negLog, Prob.negLog, if_neg hq.ne']
-  rw [if_neg (show 1 - ε ≠ 0 by simpa [Subtype.ext_iff, Prob.coe_sub] using h₂.ne')]
+  rw [Prob.negLog, Prob.negLog, ite_eq_right hq.ne']
+  rw [ite_eq_right (show 1 - ε ≠ 0 by simpa [Subtype.ext_iff, Prob.coe_sub] using h₂.ne')]
 
   --Turn the ENNReal problem into a Real problem
   have hα₂ : Subtype.mk _ pf2 ≠ 0 := by
@@ -552,7 +552,7 @@ theorem rate_Continuous_singleton {ε : Prob} {d : Type*} [Fintype d] [Decidable
     Continuous fun σ ↦ β_ ε(ρ‖{σ}) := by
   have h := HermitianMat.innerₗ.flip.continuous_iInf_fst
     (S := { m | ρ.exp_val (1 - m) ≤ ↑ε ∧ 0 ≤ m ∧ m ≤ 1 })
-    ((Metric.isBounded_Icc 0 1).subset (Set.setOf_subset_setOf_of_imp fun _ ↦ And.right))
+    ((Metric.isBounded_Icc 0 1).subset (Set.ofPred_subset_ofPred_of_imp fun _ ↦ And.right))
   simp only [of_singleton]
   conv => enter [1, σ]; rw [subtype_val_iInf']
   exact Continuous.subtype_mk (h.comp MState.Continuous_HermitianMat) _

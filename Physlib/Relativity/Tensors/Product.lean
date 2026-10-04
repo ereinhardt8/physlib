@@ -67,8 +67,8 @@ The following results exist for both `prodP` and `prodT` :
 
 ## iv. References
 
-- arXiv:2411.07667
-
+* Tooby-Smith, Formalization of physics index notation in Lean 4, arXiv:2411.07667.
+  [ref: tooby_smith_2024_index_notation]
 -/
 
 @[expose] public section
@@ -305,7 +305,6 @@ lemma Pure.prodP_permP_right {n n'} {c : Fin n → C} {c' : Fin n' → C}
 
 -/
 
-set_option backward.isDefEq.respectTransparency false in
 lemma Pure.prodP_assoc {n n1 n2} {c : Fin n → C}
     {c1 : Fin n1 → C} {c2 : Fin n2 → C}
     (p : Pure S c) (p1 : Pure S c1) (p2 : Pure S c2) :
@@ -489,8 +488,7 @@ noncomputable def tensorEquivProd {n n2 : ℕ} {c : Fin n → C} {c1 : Fin n2 �
         (Tensor.basis c1) (ComponentIdx.prod b).2)
     let P (x : S.Tensor c ⊗[k] S.Tensor c1) := f (TensorProduct.lift prodT x) = x
     change P x
-    apply TensorProduct.induction_on
-    · simp [P]
+    apply TensorProduct.inductionOn
     · intro t1 t2
       apply induction_on_basis (t := t1)
       · intro b1
@@ -607,8 +605,8 @@ lemma prodT_default_right {n} {c : Fin n → C}
 
 lemma prodT_zero_right {n} {c : Fin n → C}
     {c1 : Fin 0 → C} (t : S.Tensor c) (t1 : S.Tensor c1) :
-    prodT t t1 = (toField t1) • permT id (IsReindexing.append_zero_right) t := by
-  conv_lhs => rw [Tensor.eq_smul_toField t1]
+    prodT t t1 = (toScalar t1) • permT id (IsReindexing.append_zero_right) t := by
+  conv_lhs => rw [Tensor.eq_smul_toScalar t1]
   rw [map_smul]
   congr 1
   convert prodT_default_right _

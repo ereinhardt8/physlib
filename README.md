@@ -12,19 +12,66 @@
 
 [![](https://img.shields.io/badge/Getting-Started-darkgreen)](https://physlib.io/GettingStarted.html)
 [![](https://img.shields.io/badge/The-Website-darkgreen)](https://physlib.io)
-[![](https://img.shields.io/badge/How_To-Get_Involved-darkgreen)](https://physlib.io/GetInvolved.html)
+[![](https://img.shields.io/badge/How_To-Get_Involved-darkgreen)](https://physlib.io/get-involved)
 [![](https://img.shields.io/badge/Physlib_Zulip-Discussion-darkgreen)](https://leanprover.zulipchat.com/#narrow/channel/479953-Physlib/)
-[![](https://img.shields.io/badge/TODO-List-darkgreen)](https://physlib.io/TODOList)
+[![](https://img.shields.io/badge/TODO-List-darkgreen)](https://physlib.io/todo)
 
 
 [![](https://img.shields.io/badge/View_The-Stats-blue)](https://physlib.io/Stats)
-[![](https://img.shields.io/badge/Lean-v4.32.0-blue)](https://github.com/leanprover/lean4/releases/tag/v4.32.0)
+[![](https://img.shields.io/badge/Lean-v4.34.1-blue)](https://github.com/leanprover/lean4/releases/tag/v4.34.1)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/leanprover-community/physlib)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/leanprover-community/physlib)
 [![api_docs](https://img.shields.io/badge/doc-API_docs-blue)](https://physlib.io/docs/)
 
 </div>
 
+<table>
+<tr>
+<td colspan="3" align="center">
+
+<sub><b>UPSTREAM</b></sub> · [**Mathlib**](https://github.com/leanprover-community/mathlib4) ↑
+
+</td>
+</tr>
+<tr>
+<td colspan="3" align="center">
+
+<sub><b>THIS REPOSITORY</b></sub>
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### [**Physlib**](./Physlib)
+
+The core library — physics digitalizations reviewed and curated to a high standard, built for long-term reuse, readability, trust, and maintenance.
+
+</td>
+<td width="33%" valign="top">
+
+###  [**PhyslibAlpha**](./PhyslibAlpha)
+
+PhyslibAlpha exists for the rapid development of physics digitalizations, enabled by a lighter review process built to handle large-scale, human- or AI-generated contributions.
+
+</td>
+<td width="33%" valign="top">
+
+### [**QuantumInfo**](./QuantumInfo)
+
+Quantum information theory. Currently a distinct codebase with its own conventions and review norms; work is underway to bring it closer to Physlib.
+
+</td>
+</tr><tr>
+<td colspan="3" align="center"></td></tr>
+<tr>
+<td colspan="3" align="center">
+
+<sub><b>ADJACENT</b></sub> · [**CSLib**](https://github.com/leanprover/cslib) →
+
+</td>
+</tr>
+</table>
 
 ## Requirements of the project
 
@@ -61,13 +108,14 @@ Because of the lower-review bar for PhyslibAlpha we cannot promise to maintain c
 Physlib is open-source and community run, and we welcome contributions from anyone.
 All you need to do is open a pull-request with your changes
 and our team of maintainers will review it and iterate with you on feedback until it
-can be merged.
+can be merged. Please add references to the `## References` section at the top of the file
+and add them to the .bib file.
 
 If you unsure where you would like to contribute, you may find ideas on:
 - our [open issues](https://github.com/leanprover-community/physlib/issues).
-- our [todo list](https://physlib.io/TODOList)
-- our [Get Involved page](https://physlib.io/GetInvolved.html)
-- the [quantumInfo todo page](./QuantumInfo/WildeTODO.md)
+- our [todo list](https://physlib.io/todo)
+- our [Get Involved page](https://physlib.io/get-involved)
+- the [quantumInfo todo page](./docs/WildeTODO.md)
 > [!NOTE]
 > If stuck at any point there are lots of people happly to help on the [Physlib zulip](https://leanprover.zulipchat.com/#narrow/channel/479953-Physlib)
 
@@ -85,9 +133,12 @@ or
 
 - Clone this repository (or download the repository as a Zip file)
 - Open a terminal at the top-level in the corresponding directory.
-- Run `lake exe cache get`. The command `lake` should have been installed when you installed Lean.
+- Run `lake exe get_cache` to download the cached artifacts from the internet. This will speed up the next step drastically. Do not worry if it fails, you can still run `lake build`, it will just be much slower.
 - Run `lake build`.
 - Open the directory (not a single file) in Visual Studio Code (or another Lean compatible code editor).
+
+Once set up, `lake build` only recompiles files you have actually changed, plus
+anything importing them.
 
 At the moment Physlib is divided into two essentially disjoint halves, `Physlib` and `QuantumInfo`.
 These were two repositories that merged in an effort to create a more cohesive ecosystem for physics

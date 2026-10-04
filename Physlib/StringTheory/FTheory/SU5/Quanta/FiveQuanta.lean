@@ -7,6 +7,8 @@ module
 
 public import Physlib.Particles.SuperSymmetry.SU5.ChargeSpectrum.MinimallyAllowsTerm.OfFinset
 public import Physlib.StringTheory.FTheory.SU5.Fluxes.NoExotics.Completeness
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.Group.Action.Defs
 /-!
 
 # Quanta of 5-d representations
@@ -78,8 +80,8 @@ properties thereof.
 
 ## iv. References
 
-A reference for the anomaly cancellation conditions is arXiv:1401.5084.
-
+* Rational F-Theory GUTs without exotics (arXiv:1401.5084), Anomaly cancellation
+  conditions. [ref: arxiv_1401_5084]
 -/
 
 @[expose] public section
@@ -910,9 +912,9 @@ variable [CommRing 𝓩]
   The anomaly coefficient of a `FiveQuanta` is given by the pair of integers:
   `(∑ᵢ qᵢ Nᵢ, ∑ᵢ qᵢ² Nᵢ)`.
 
-  The first components is for the mixed U(1)-MSSM, see equation (22) of arXiv:1401.5084.
-  The second component is for the mixed U(1)Y-U(1)-U(1) gauge anomaly,
-  see equation (23) of arXiv:1401.5084.
+  The first components is for the mixed U(1)-MSSM, see equation (22) of arXiv:1401.5084
+  [ref: arxiv_1401_5084]. The second component is for the mixed U(1)Y-U(1)-U(1) gauge anomaly,
+  see equation (23) of arXiv:1401.5084 [ref: arxiv_1401_5084].
 -/
 def anomalyCoefficient (F : FiveQuanta 𝓩) : 𝓩 × 𝓩 :=
   ((F.map fun x => x.2.2 • x.1).sum, (F.map fun x => x.2.2 • (x.1 * x.1)).sum)

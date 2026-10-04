@@ -58,6 +58,7 @@ theorem H₁_le_1 (p : Prob) : H₁ p < 1 := by
 theorem H₁_le_exp_m1 (p : Prob) : H₁ p ≤ Real.exp (-1) :=
   Real.negMulLog_le_rexp_neg_one p.zero_le_coe
 
+set_option backward.isDefEq.respectTransparency false in
 theorem H₁_concave : ∀ (x y : Prob), ∀ (p : Prob), p[H₁ x ↔ H₁ y] ≤ H₁ (p[x ↔ y]) := by
   intros x y p
   simp only [H₁, smul_eq_mul, Prob.coe_one_minus, Mixable.mix, Mixable.mix_ab, Mixable.mkT_instUniv,
@@ -88,7 +89,7 @@ def Hₛ (d : ProbDistribution α) : ℝ :=
 
 /-- Shannon entropy of a distribution is nonnegative. -/
 theorem Hₛ_nonneg (d : ProbDistribution α) : 0 ≤ Hₛ d :=
-  Finset.sum_nonneg' fun _ ↦ H₁_nonneg _
+  Finset.sum_nonneg fun _ _ ↦ H₁_nonneg _
 
 /-- Shannon entropy of a distribution is at most ln d. -/
 theorem Hₛ_le_log_d (d : ProbDistribution α) : Hₛ d ≤ Real.log (Fintype.card α) := by

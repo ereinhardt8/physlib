@@ -7,7 +7,6 @@ module
 
 public import Physlib.Meta.Informal.Basic
 public import Physlib.QuantumMechanics.Operators.Momentum
-public import Physlib.QuantumMechanics.QuantumSystem.Basic
 /-!
 
 # The free particle on `Space d`
@@ -29,6 +28,7 @@ to the Hamiltonian `p²/2m` with no potential.
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section

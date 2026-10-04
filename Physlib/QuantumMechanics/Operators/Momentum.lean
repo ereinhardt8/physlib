@@ -36,6 +36,7 @@ Notation:
 
 ## iv. References
 
+* None.
 -/
 
 TODO "Extend the domain of the momentum operator to the Sobolev space `H¹`."
@@ -136,6 +137,15 @@ lemma momentumOperator_isSymmetric : (𝓟 i).IsSymmetric := by
   congr 2
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hI₂ hI₃ hI₄ (by fun_prop) (by fun_prop)
 
+open scoped InnerProductSpace in
+/-- The momentum operator is symmetric on Schwartz maps, in terms of `momentumCLM`. -/
+lemma momentumCLM_inner (f g : 𝓢(Space d, ℂ)) :
+    ⟪(schwartzEquiv volume (𝐩 i f) : SpaceDHilbertSpace d), schwartzEquiv volume g⟫_ℂ
+      = ⟪(schwartzEquiv volume f : SpaceDHilbertSpace d), schwartzEquiv volume (𝐩 i g)⟫_ℂ := by
+  have h := momentumOperator_isSymmetric (d := d) i (schwartzEquiv volume f)
+    (schwartzEquiv volume g)
+  simpa [momentumOperator_apply] using h
+
 lemma momentumOperator_isUnbounded : (𝓟 i).IsUnbounded := by
   refine (LinearPMap.IsSymmetric.isUnbounded_iff_hasDenseDomain ?_).mpr ?_
   · exact momentumOperator_isSymmetric i
@@ -152,7 +162,7 @@ lemma momentumSqOperator_domain_eq : momentumSqOperator.domain = SchwartzSubmodu
   rw [momentumSqOperator_eq, sum_domain]
   rcases eq_zero_or_pos d with rfl | hd
   · simp [SchwartzSubmodule.zero_eq_top]
-  · letI := Fin.pos_iff_nonempty.mp hd
+  · let := Fin.pos_iff_nonempty.mp hd
     rw [← iInf_const (a := SchwartzSubmodule d) (ι := Fin d)]
     congr
 

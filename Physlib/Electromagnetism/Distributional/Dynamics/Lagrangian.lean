@@ -7,7 +7,6 @@ module
 
 public import Physlib.Electromagnetism.Distributional.Dynamics.CurrentDensity
 public import Physlib.Electromagnetism.Distributional.Dynamics.KineticTerm
-public import Physlib.Relativity.Tensors.RealTensor.Vector.MinkowskiProduct
 /-!
 
 # The Lagrangian in electromagnetism
@@ -38,9 +37,8 @@ In this implementation we set `μ₀ = 1`. It is a TODO to introduce this consta
 
 ## iv. References
 
-- https://quantummechanics.ucsd.edu/ph130a/130_notes/node452.html
-- https://ph.qmul.ac.uk/sites/default/files/EMT10new.pdf
-
+* https://quantummechanics.ucsd.edu/ph130a/130_notes/node452.html. [ref: ucsd_ph130a_node452]
+* https://ph.qmul.ac.uk/sites/default/files/EMT10new.pdf. [ref: qmul_emt10_notes]
 -/
 
 @[expose] public section

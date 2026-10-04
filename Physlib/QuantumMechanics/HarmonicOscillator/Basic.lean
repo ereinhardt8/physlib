@@ -8,7 +8,6 @@ module
 public import Physlib.Meta.Informal.Basic
 public import Physlib.QuantumMechanics.Operators.Momentum
 public import Physlib.QuantumMechanics.Operators.Multiplication
-public import Physlib.QuantumMechanics.QuantumSystem.Basic
 /-!
 
 # The quantum harmonic oscillator
@@ -23,6 +22,7 @@ in `d` dimensions.
     kinetic, potential and Hamiltonian operators.
 - `LadderOperators.lean` : Definitions of the raising/lowering/number operators
     and their algebraic properties.
+- `NumberOperator.lean` : The number operators as unbounded operators, symmetry.
 
 ## ii. Key results
 
@@ -32,6 +32,7 @@ in `d` dimensions.
   - A.1. Positive mass
   - A.2. Positive natural frequencies
 - B. Characteristic lengths
+  - B.1. Coordinate rescaling
 - C. The quadratic potential function
   - C.1. Positive-definite matrix
   - C.2. Quadratic form
@@ -46,18 +47,10 @@ in `d` dimensions.
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section
-
-TODO "Determine the spectrum of the quantum harmonic oscillator in terms of
-  the natural frequencies and integer quantum numbers."
-
-TODO "Determine the energy eigenstates of the quantum harmonic oscillator
-  in the 'Cartesian basis' in terms of Hermite polynomials."
-
-TODO "Determine the energy eigenstates of the isotropic quantum harmonic oscillator
-  in the 'spherical basis' in terms of spherical harmonics."
 
 noncomputable section
 namespace QuantumMechanics
@@ -125,11 +118,41 @@ lemma ξ_nonneg : 0 ≤ Q.ξ i := (Q.ξ_pos i).le
 @[simp]
 lemma ξ_ne_zero : Q.ξ i ≠ 0 := (Q.ξ_pos i).ne'
 
+/-- The characteristic length is nonzero as a complex number. -/
+lemma ξ_ofReal_ne_zero : ((Q.ξ i : ℝ) : ℂ) ≠ 0 := by exact_mod_cast Q.ξ_ne_zero i
+
 lemma ξ_sq : (Q.ξ i) ^ 2 = ℏ / (Q.m * Q.ω i) := by rw [Q.ξ_eq]; field_simp; simp [← mul_rotate]
 
 lemma ξ_inv : (Q.ξ i)⁻¹ = √Q.m * √(Q.ω i) / √ℏ := by simp [ξ_eq]
 
 lemma ξ_inv' : (Q.ξ i)⁻¹ = Q.m * Q.ω i * Q.ξ i / ℏ := by field_simp; simp [ξ_sq, mul_assoc]
+
+/-- `ξᵢ² m ωᵢ = ℏ`, as complex numbers. -/
+lemma ξ_sq_mul_ofReal :
+    ((Q.ξ i : ℝ) : ℂ) ^ 2 * ((Q.m : ℝ) : ℂ) * ((Q.ω i : ℝ) : ℂ) = (ℏ : ℂ) := by
+  have h := Q.ξ_sq i
+  rw [eq_div_iff (mul_ne_zero Q.m_ne_zero (Q.ω_ne_zero i))] at h
+  have h' : Q.ξ i ^ 2 * Q.m * Q.ω i = ℏ := by rw [mul_assoc]; exact h
+  exact_mod_cast h'
+
+/-!
+### B.1. Coordinate rescaling
+-/
+
+/-- The continuous linear equivalence which rescales `xᵢ` to `ξᵢxᵢ`. -/
+def ξEquiv : Space d ≃L[ℝ] Space d where
+  toFun x := ⟨fun i ↦ Q.ξ i * x i⟩
+  invFun x := ⟨fun i ↦ (Q.ξ i)⁻¹ * x i⟩
+  map_add' _ _ := by ext; simp [mul_add]
+  map_smul' _ _ := by ext; simp [mul_left_comm]
+  left_inv _ := by simp
+  right_inv _ := by simp
+
+@[simp]
+lemma ξEquiv_apply (x : Space d) (i : Fin d) : Q.ξEquiv x i = Q.ξ i * x i := rfl
+
+@[simp]
+lemma ξEquiv_symm_apply (x : Space d) (i : Fin d) : Q.ξEquiv.symm x i = (Q.ξ i)⁻¹ * x i := rfl
 
 /-!
 ## C. The quadratic potential function
@@ -172,10 +195,41 @@ def potentialFunction : Space d → ℝ := Q.potentialQuadraticForm ∘ Space.va
 
 lemma potentialFunction_eq : Q.potentialFunction = Q.potentialQuadraticForm ∘ Space.val := rfl
 
+/-- `V(x) = ∑ᵢ ½ m ωᵢ² xᵢ²`. -/
+lemma potentialFunction_apply (x : Space d) :
+    Q.potentialFunction x = ∑ i, 2⁻¹ * Q.m * Q.ω i ^ 2 * x i ^ 2 := by
+  simp only [potentialFunction_eq, potentialQuadraticForm, Matrix.toQuadraticForm',
+    Function.comp_apply]
+  simp [Matrix.toLinearMap₂'_apply, potentialMatrix_eq, Matrix.diagonal_apply, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun i _ => by ring
+
+/-- The potential function, as a complex-valued function, has temperate growth. -/
+lemma potentialFunction_hasTemperateGrowth :
+    Function.HasTemperateGrowth (fun x : Space d => (Q.potentialFunction x : ℂ)) := by
+  have hc : ∀ i, Function.HasTemperateGrowth (fun x : Space d => ((x i : ℝ) : ℂ)) := fun i => by
+    have h := (Complex.ofRealCLM ∘L Space.coordCLM i).hasTemperateGrowth
+    convert h using 1
+    ext x
+    simp [Space.coordCLM_apply, Space.coord_apply]
+  have h : (fun x : Space d => (Q.potentialFunction x : ℂ)) =
+      fun x => ∑ i, ((2⁻¹ * Q.m * Q.ω i ^ 2 : ℝ) : ℂ) * ((x i : ℝ) : ℂ) ^ 2 := by
+    ext x
+    simp [potentialFunction_apply]
+  rw [h]
+  exact Function.HasTemperateGrowth.sum fun i _ =>
+    (Function.HasTemperateGrowth.const _).mul ((hc i).pow 2)
+
+/-- The potential function for the harmonic oscillator is continuous. -/
+lemma potentialFunction_continuous : Continuous Q.potentialFunction := by
+  have heq : Q.potentialFunction = fun x => ∑ i, 2⁻¹ * Q.m * Q.ω i ^ 2 * x i ^ 2 :=
+    funext Q.potentialFunction_apply
+  rw [heq]
+  fun_prop
+
 /-- The potential function for the harmonic oscillator is a.e. strongly measurable. -/
-informal_lemma potentialFunction_aestronglyMeasurable where
-  deps := [``HarmonicOscillator]
-  tag := "QM-HO-potAESM"
+lemma potentialFunction_aestronglyMeasurable :
+    MeasureTheory.AEStronglyMeasurable Q.potentialFunction MeasureTheory.volume :=
+  Q.potentialFunction_continuous.aestronglyMeasurable
 
 end
 
@@ -209,21 +263,63 @@ abbrev HS (_ : HarmonicOscillator d) : Type _ := SpaceDHilbertSpace d
 /-- The kinetic energy operator, `p²/2m`. -/
 def kineticOperator : Q.HS →ₗ.[ℂ] Q.HS := (2 * Q.m)⁻¹ • momentumSqOperator
 
+open SchwartzMap in
+/-- The kinetic operator on a Schwartz map, `(1/2m) ∑ᵢ pᵢ (pᵢ f)`. -/
+lemma kineticOperator_apply_schwartz (f : 𝓢(Space d, ℂ))
+    (h : (schwartzEquiv volume f : Q.HS) ∈ Q.kineticOperator.domain) :
+    Q.kineticOperator ⟨schwartzEquiv volume f, h⟩
+      = schwartzEquiv volume (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f)) := by
+  have h1 : Q.kineticOperator ⟨schwartzEquiv volume f, h⟩ =
+      (2 * Q.m)⁻¹ • momentumSqOperator ⟨schwartzEquiv volume f, h⟩ :=
+    LinearPMap.smul_apply _ _ _
+  rw [h1]
+  erw [LinearPMap.sum_apply]
+  rw [RCLike.real_smul_eq_coe_smul (K := ℂ), RCLike.real_smul_eq_coe_smul (K := ℂ), map_smul,
+    map_sum, Submodule.coe_smul, Submodule.coe_sum]
+  congr 1
+  refine Finset.sum_congr rfl fun a _ => ?_
+  have hr : ∀ x : (𝓟 a).domain, 𝓟 a x ∈ (𝓟 a).domain := momentumOperator_range a
+  have key : ∀ H, ((𝓟 a).comp (𝓟 a) hr) ⟨(schwartzEquiv volume f : Q.HS), H⟩
+      = schwartzEquiv volume (𝐩 a (𝐩 a f)) := fun H => by
+    have H' : (schwartzEquiv volume f : Q.HS) ∈ (𝓟 a).domain := H
+    have e3 : (⟨𝓟 a ⟨(schwartzEquiv volume f : Q.HS), H'⟩, hr _⟩ : (𝓟 a).domain)
+        = ⟨(schwartzEquiv volume (𝐩 a f) : Q.HS), (schwartzEquiv volume (𝐩 a f)).2⟩ := by
+      apply Subtype.ext
+      show 𝓟 a (schwartzEquiv volume f) = (schwartzEquiv volume (𝐩 a f) : Q.HS)
+      rw [momentumOperator_apply, LinearEquiv.symm_apply_apply]
+    show 𝓟 a ⟨𝓟 a ⟨(schwartzEquiv volume f : Q.HS), H'⟩, hr _⟩ = _
+    rw [e3]
+    show 𝓟 a (schwartzEquiv volume (𝐩 a f)) = _
+    rw [momentumOperator_apply, LinearEquiv.symm_apply_apply]
+  exact key _
+
 /-!
 ### F.2. Potential energy
 -/
 
 section
 
-open MeasureTheory Complex
+open MeasureTheory Complex SchwartzMap SchwartzSubmodule
 
 /-- The potential operator which maps `ψ` to `Q.potentialFunction • ψ`. -/
 def potentialOperator : Q.HS →ₗ.[ℂ] Q.HS := 𝓜 volume (ofReal ∘ Q.potentialFunction)
 
-/-- The potential operators for the harmonic oscillator is self-adjoint. -/
-informal_lemma potentialOperator_isSelfAdjoint where
-  deps := [``HarmonicOscillator.potentialFunction_aestronglyMeasurable]
-  tag := "QM-HO-potSA"
+/-- The potential operator on a Schwartz map, almost everywhere `V f`. -/
+lemma potentialOperator_apply_schwartz (f : 𝓢(Space d, ℂ))
+    (h : (schwartzEquiv volume f : Q.HS) ∈ Q.potentialOperator.domain) :
+    ⇑(Q.potentialOperator ⟨schwartzEquiv volume f, h⟩) =ᵐ[volume]
+      fun x => (Q.potentialFunction x : ℂ) * f x := by
+  have h1 : ⇑(Q.potentialOperator ⟨schwartzEquiv volume f, h⟩) =ᵐ[volume]
+      (ofReal ∘ Q.potentialFunction) • ⇑(schwartzEquiv volume f : Q.HS) := mulOperator_apply_ae _
+  filter_upwards [h1, schwartzEquiv_coe_ae (μ := volume) f] with x hx1 hx2
+  rw [hx1]
+  simp [hx2]
+
+/-- The potential operator for the harmonic oscillator is self-adjoint. -/
+lemma potentialOperator_isSelfAdjoint : IsSelfAdjoint Q.potentialOperator :=
+  mulOperator_isSelfAdjoint_ofReal
+    (Complex.continuous_ofReal.comp Q.potentialFunction_continuous).aestronglyMeasurable
+    (by ext; simp)
 
 end
 

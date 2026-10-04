@@ -7,14 +7,11 @@ module
 
 public import QuantumInfo.Channels.Bundled
 public import QuantumInfo.Channels.CPTP
-public import QuantumInfo.Channels.Dual
 public import QuantumInfo.Channels.MatrixMap
 public import QuantumInfo.Channels.Unbundled
 public import QuantumInfo.States.Mixed.MState
 public import QuantumInfo.Entropy.VonNeumann
-public import QuantumInfo.Entropy.SSA
 public import QuantumInfo.Entropy.Relative
-public import QuantumInfo.Entropy.DPI
 public import QuantumInfo.ForMathlib.HermitianMat.CFC
 
 /-! # Pinching channels
@@ -78,6 +75,7 @@ theorem pinching_kraus_ortho (ρ : MState d) (i j : spectrum ℝ ρ.m) :
   · grind [sq, HermitianMat.mat_pow, pinching_sq_eq_self]
   · exact pinching_kraus_orthogonal ρ hij
 
+set_option backward.isDefEq.respectTransparency false in
 theorem pinching_sum (ρ : MState d) : ∑ k, pinching_kraus ρ k = 1 := by
   ext i j
   simp only [pinching_kraus, HermitianMat.cfc]
@@ -252,6 +250,7 @@ theorem pinching_idempotent (ρ σ : MState d) :
   ext1
   grind [pinching_eq_sum_conj]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem inner_cfc_pinching (ρ σ : MState d) (f : ℝ → ℝ) :
     ⟪ρ.M, (pinching_map σ ρ).M.cfc f⟫ = ⟪(pinching_map σ ρ).M, (pinching_map σ ρ).M.cfc f⟫ := by
   nth_rw 2 [pinchingMap_apply_M]
@@ -414,10 +413,10 @@ theorem pinching_pythagoras (ρ σ : MState d) :
     rw [h_eq₂, h_eq₁]
     simp only [EReal.coe_sub]
     rw [← add_sub_assoc, EReal.sub_add_cancel]
-  · simp only [qRelativeEnt, SandwichedRelRentropy, dif_pos zero_lt_one]
+  · simp only [qRelativeEnt, SandwichedRelRentropy, dite_eq_left zero_lt_one]
     trans ⊤
-    · exact dif_neg h_ker
+    · exact dite_eq_right h_ker
     · convert (add_top _).symm
-      apply dif_neg ?_
+      apply dite_eq_right ?_
       contrapose! h_ker
       exact h_ker.trans (pinching_map_ker_le ρ σ)

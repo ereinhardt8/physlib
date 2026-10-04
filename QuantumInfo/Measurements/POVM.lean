@@ -7,7 +7,6 @@ module
 
 public import QuantumInfo.Channels.Bundled
 public import QuantumInfo.Channels.CPTP
-public import QuantumInfo.Channels.Dual
 public import QuantumInfo.Channels.MatrixMap
 public import QuantumInfo.Channels.Unbundled
 
@@ -107,6 +106,7 @@ theorem measurementMap_apply_matrix (Λ : POVM X d) (m : Matrix d d ℂ) :
   rw [LinearMap.sum_apply]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 open HermitianMat in
 theorem measurementMap_apply_hermitianMat (Λ : POVM X d) (m : HermitianMat d ℂ) :
   Λ.measurementMap.toHPMap m = ∑ x : X,
@@ -151,7 +151,7 @@ theorem traceLeft_measurementMap_eq_measure (Λ : POVM X d) (ρ : MState d) :
     change _ = Matrix.trace _
     rw [Matrix.trace_mul_cycle, HermitianMat.pow_half_mul (Λ.nonneg i)]
     exact HermitianMat.inner_eq_trace_rc _ _
-  · conv => enter [2, 2, x]; rw [if_neg (by grind)]
+  · conv => enter [2, 2, x]; rw [ite_eq_right (by grind)]
     simp
 
 /-- The action of measuring a state with the POVM `Λ`, discarding the resulting state, and keeping

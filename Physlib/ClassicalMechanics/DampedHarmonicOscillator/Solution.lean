@@ -23,7 +23,8 @@ case, polynomial for the critically damped case, and hyperbolic for the overdamp
 
 - `InitialConditions` is a structure for the initial position and velocity.
 - `trajectory` selects the appropriate regime-specific trajectory from the sign of the
-  discriminant.
+  discriminant; `trajectory_eq_of_underdamped_relaxationTime` rewrites the underdamped
+  solution with the relaxation time `τ`.
 - `trajectory_equationOfMotion_of_underdamped`,
   `trajectory_equationOfMotion_of_criticallyDamped`, and
   `trajectory_equationOfMotion_of_overdamped` prove the selected trajectory satisfies the
@@ -49,9 +50,10 @@ case, polynomial for the critically damped case, and hyperbolic for the overdamp
 ## iv. References
 
 References for the damped harmonic oscillator include:
-- Landau & Lifshitz, Mechanics, page 76, section 25.
-- Goldstein, Classical Mechanics, Chapter 2.
 
+* Landau & Lifshitz, Mechanics, page 76, section 25. [ref: landau_mechanics]
+* Goldstein, Classical Mechanics, Chapter 6, Section 6.5 (Forced Vibrations and the Effect of
+  Dissipative Forces). [ref: goldstein_classicalmechanics]
 -/
 
 @[expose] public section
@@ -162,6 +164,16 @@ lemma trajectory_eq_of_overdamped (IC : InitialConditions) (hS : S.IsOverdamped)
     rw [IsCriticallyDamped]
     linarith
   simp [trajectory, hnotUnder, hnotCritical]
+
+/-- In the underdamped regime, the selected trajectory is `exp (-t / τ)` times the
+trigonometric base, `τ` being the relaxation time. -/
+lemma trajectory_eq_of_underdamped_relaxationTime (IC : InitialConditions)
+    (hS : S.IsUnderdamped) :
+    S.trajectory IC =
+      fun t : Time => exp (-(t : ℝ) / S.relaxationTime) • S.underdampedBase IC t := by
+  rw [S.trajectory_eq_of_underdamped IC hS]
+  funext t
+  rw [S.exp_neg_decayRate_mul t]
 
 /-- The selected trajectory is smooth. -/
 lemma trajectory_contDiff (IC : InitialConditions) :
@@ -496,21 +508,6 @@ private lemma phaseVectorField_apply (a b : EuclideanSpace ℝ (Fin 1)) :
     S.phaseVectorField (a, b) = (b, (-(S.m⁻¹ * S.k)) • a + (-(S.m⁻¹ * S.γ)) • b) := by
   simp [phaseVectorField]
 
-private lemma toRealCLE_symm_one : Time.toRealCLE.symm (1 : ℝ) = (1 : Time) := by
-  rw [ContinuousLinearEquiv.symm_apply_eq]
-  change (1 : ℝ) = (1 : Time).val
-  rw [Time.one_val]
-
-/-- Bridge from the time derivative to `HasDerivAt` for a curve reparametrised through the
-canonical `ℝ ≃L[ℝ] Time` equivalence. -/
-private lemma hasDerivAt_comp_toRealCLE_symm (w : Time → EuclideanSpace ℝ (Fin 1)) (τ : ℝ)
-    (hw : DifferentiableAt ℝ w (Time.toRealCLE.symm τ)) :
-    HasDerivAt (fun τ : ℝ => w (Time.toRealCLE.symm τ))
-      (∂ₜ w (Time.toRealCLE.symm τ)) τ := by
-  simpa [Function.comp_def, Time.deriv_eq, toRealCLE_symm_one] using
-    hw.hasFDerivAt.comp_hasDerivAt_of_eq τ
-      ((Time.toRealCLE.symm : ℝ →L[ℝ] Time).hasDerivAt) rfl
-
 /-- The phase curve `τ ↦ (z t, ẋ t)` (with `t = toRealCLE.symm τ`) of a smooth solution `z`
 solves the first-order phase-space ODE with vector field `phaseVectorField`. -/
 private lemma phaseCurve_hasDerivAt (z : Time → EuclideanSpace ℝ (Fin 1))
@@ -519,8 +516,8 @@ private lemma phaseCurve_hasDerivAt (z : Time → EuclideanSpace ℝ (Fin 1))
       (S.phaseVectorField (z (Time.toRealCLE.symm τ), ∂ₜ z (Time.toRealCLE.symm τ))) τ := by
   rw [S.phaseVectorField_apply,
     ← S.acceleration_eq_of_equationOfMotion z hEOM (Time.toRealCLE.symm τ)]
-  exact (hasDerivAt_comp_toRealCLE_symm z τ (hz.differentiable (by simp) _)).prodMk
-    (hasDerivAt_comp_toRealCLE_symm (∂ₜ z) τ (deriv_differentiable_of_contDiff z hz _))
+  exact (Time.hasDerivAt_comp_toRealCLE_symm z τ (hz.differentiable (by simp) _)).prodMk
+    (Time.hasDerivAt_comp_toRealCLE_symm (∂ₜ z) τ (deriv_differentiable_of_contDiff z hz _))
 
 /-- Any two smooth solutions of the damped equation of motion with the same initial position and
 velocity are equal. -/
@@ -537,7 +534,7 @@ lemma equationOfMotion_unique (x y : Time → EuclideanSpace ℝ (Fin 1))
     (v := fun _ p => S.phaseVectorField p) (s := fun _ => Set.univ) (t₀ := (0 : ℝ))
     (f := fun τ : ℝ => (x (Time.toRealCLE.symm τ), ∂ₜ x (Time.toRealCLE.symm τ)))
     (g := fun τ : ℝ => (y (Time.toRealCLE.symm τ), ∂ₜ y (Time.toRealCLE.symm τ)))
-    (fun _ => S.phaseVectorField.lipschitz.lipschitzOnWith)
+    (fun _ => S.phaseVectorField.lipschitzWith.lipschitzOnWith)
     (fun τ => ⟨S.phaseCurve_hasDerivAt x hx hEOMx τ, Set.mem_univ _⟩)
     (fun τ => ⟨S.phaseCurve_hasDerivAt y hy hEOMy τ, Set.mem_univ _⟩)
     hIC

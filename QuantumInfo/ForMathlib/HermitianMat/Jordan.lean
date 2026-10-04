@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Algebra.Jordan.Basic
 
-public import QuantumInfo.ForMathlib.HermitianMat.CFC
 public import QuantumInfo.ForMathlib.HermitianMat.Order
 
 /-!
@@ -36,10 +35,12 @@ set_option backward.isDefEq.respectTransparency false in
 theorem symmMul_comm : A.symmMul B = B.symmMul A := by
   rw [symmMul, symmMul, Subtype.mk.injEq, add_comm]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem symmMul_zero : A.symmMul 0 = 0:= by
   simp [symmMul]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem zero_symmMul : symmMul 0 A = 0 := by
   simp [symmMul]

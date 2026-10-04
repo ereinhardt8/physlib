@@ -7,9 +7,6 @@ module
 
 public import Physlib.Particles.StandardModel.Basic
 public import Physlib.Relativity.Fermions.Weyl.LeftHanded
-public import Physlib.Relativity.Fermions.Weyl.RightHanded
-public import Physlib.Relativity.Fermions.Weyl.DualLeftHanded
-public import Physlib.Relativity.Fermions.Weyl.DualRightHanded
 /-!
 # The type corresponding to quark doublets
 
@@ -61,7 +58,7 @@ The AddCommGroup and module instances are inherited from the underlying tensor p
 
 instance : AddCommGroup QuarkDoublet := Equiv.addCommGroup valEquiv
 
-instance : Module ℂ QuarkDoublet := Equiv.module ℂ valEquiv
+instance : Module ℂ QuarkDoublet := AddEquiv.module ℂ { valEquiv with map_add' _ _ := rfl }
 
 /-- The linear equivalence between `QuarkDoublet` and its underlying tensor product space. -/
 def valLinEquiv : QuarkDoublet ≃ₗ[ℂ]

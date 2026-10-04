@@ -38,8 +38,7 @@ terms in the potential.
 
 ## iv. References
 
-There are no known references for the results in this file.
-
+* None.
 -/
 
 @[expose] public section
@@ -61,7 +60,7 @@ a `FieldLabel`, returns the finite set of charges associated with representation
 corresponding to that `FieldLabel`.
 
 -/
-/-- Given an `x : Charges`, the charges associated with a given `FieldLabel`. -/
+/-- Given an `x : ChargeSpectrum 𝓩`, the charges associated with a given `FieldLabel`. -/
 def ofFieldLabel (x : ChargeSpectrum 𝓩) : FieldLabel → Finset 𝓩
   | .fiveBarHd => x.qHd.toFinset
   | .fiveBarHu => x.qHu.toFinset

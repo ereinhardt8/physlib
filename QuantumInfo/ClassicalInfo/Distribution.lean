@@ -47,7 +47,7 @@ def mk' (f : α → ℝ) (h₁ : ∀i, 0 ≤ f i) (hN : ∑ i, f i = 1) : ProbDi
   have h₃ : ∀x, f x ≤ 1 := by
     intro x
     simp [← hN, Fintype.sum_eq_sum_compl_add x]
-    exact Finset.sum_nonneg' h₁
+    exact Finset.sum_nonneg fun i _ ↦ h₁ i
   ⟨ fun i ↦ ⟨f i, ⟨h₁ i, h₃ i⟩⟩, hN⟩
 
 instance instFunLikeProb : FunLike (ProbDistribution α) α Prob where
@@ -116,7 +116,7 @@ theorem constant_of_exists_one {D : ProbDistribution α} {x : α} (h : D x = 1) 
     rw [← Finset.add_sum_erase _ _ (Finset.mem_univ x), h, Prob.coe_one] at this
     rw [← Finset.add_sum_erase _ _ (a := y) (by simpa using (Ne.symm h₂))] at this
     have : 0 ≤ ∑ x ∈ Finset.erase (Finset.erase Finset.univ x) y, (D x : ℝ) :=
-      Finset.sum_nonneg' (fun _ ↦ Prob.zero_le_coe)
+      Finset.sum_nonneg (fun _ _ ↦ Prob.zero_le_coe)
     linarith
 
 /-- Make an uniform distribution. -/
@@ -149,6 +149,7 @@ def extend_right (d : ProbDistribution α) : ProbDistribution (α ⊕ β) :=
 def extend_left (d : ProbDistribution α) : ProbDistribution (β ⊕ α) :=
   ⟨fun x ↦ Sum.casesOn x (Function.const _ 0) d.val, by simp⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Make a convex mixture of two distributions on the same set. -/
 instance instMixable : Mixable (α → ℝ) (ProbDistribution α) :=
   Mixable.instSubtype (inferInstance) (fun _ _ hab hx hy ↦ by
@@ -164,6 +165,7 @@ def relabel (d : ProbDistribution α) (σ : β ≃ α) : ProbDistribution β :=
 -- The two properties below (and congrRandVar) follow from the fact that Distribution is a
 -- contravariant functor.
 -- However, mathlib does not seem to support that outside of the CategoryTheory namespace
+set_option backward.isDefEq.respectTransparency false in
 /-- ProbDistribution on α and β are equivalent for equivalent types α ≃ β. -/
 def congr (σ : α ≃ β) : ProbDistribution α ≃ ProbDistribution β := by
   constructor
@@ -252,6 +254,7 @@ def expect_val (X : RandVar α T) : T := by
     exact Set.mem_range.mp (inst.convex.sum_mem h₀ h₁ hz)
   exact (inst.mkT ht).1
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The expectation value of a random variable over `α = Fin 2` is the same as `Mixable.mix`
 with probabiliy weight `X.distr 0` -/
 theorem expect_val_eq_mixable_mix (d : ProbDistribution (Fin 2)) (x₁ x₂ : T) :
@@ -269,6 +272,7 @@ theorem expect_val_eq_mixable_mix (d : ProbDistribution (Fin 2)) (x₁ x₂ : T)
       simpa only [Subtype.ext_iff, Prob.coe_one_minus, eq_sub_iff_add_eq, add_comm,
         fun_eq_val, Fin.sum_univ_two] using d.property
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The expectation value of a random variable with constant probability distribution
   `constant x` is its value at `x` -/
 theorem expect_val_constant (x : α) (f : α → T) : expect_val ⟨f, (constant x)⟩ = f x := by
@@ -309,6 +313,7 @@ omit inst in
 lemma map_congr_eq_congr_map {S : Type _} [Mixable U S] (f : T → S) (σ : α ≃ β) (X : RandVar α T) :
   f <$> congrRandVar σ X = congrRandVar σ (f <$> X) := by rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The expectation value is invariant under equivalence of random variables -/
 @[simp]
 theorem expect_val_congr_eq_expect_val (σ : α ≃ β) (X : RandVar α T) :

@@ -5,11 +5,6 @@ Authors: Rein Zustand
 -/
 module
 
-public import Physlib.Mathematics.InnerProductSpace.Basic
-public import Mathlib.Analysis.InnerProductSpace.Dual
-public import Physlib.SpaceAndTime.Time.Derivatives
-public import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
-public import Physlib.Mathematics.VariationalCalculus.HasVarGradient
 public import Physlib.ClassicalMechanics.EulerLagrange
 
 /-!
@@ -54,9 +49,8 @@ This is because:
 
 ## iv. References
 
-- Landau & Lifshitz, "Mechanics", §2 (The principle of least action)
-- Landau & Lifshitz, "Mechanics", §4 (The Lagrangian for a free particle)
-
+* Landau & Lifshitz, "Mechanics", §2 (The principle of least action). [ref: landau_mechanics]
+* Landau & Lifshitz, "Mechanics", §4 (The Lagrangian for a free particle). [ref: landau_mechanics]
 -/
 
 @[expose] public section

@@ -8,6 +8,7 @@ module
 public import QuantumInfo.Entropy.Relative
 public import QuantumInfo.ForMathlib.HermitianMat.Sqrt
 public import QuantumInfo.ForMathlib.HermitianMat.LiebConcavity
+public import Mathlib.Data.Fintype.Shrink
 
 @[expose] public section
 
@@ -120,6 +121,7 @@ The trace functional is invariant under joint unitary conjugation:
 This corresponds to equation (2.3) in the paper.
 Proved using `rpow_conj_unitary` (f(UXU†) = U f(X) U†) and `conj_conj`.
 -/
+set_option backward.isDefEq.respectTransparency false in
 theorem sandwichedTraceFunctional_conj_unitary_hermitian
     (U : Matrix.unitaryGroup d ℂ) (A B : HermitianMat d ℂ) :
     let γ := (1 - α) / (2 * α)
@@ -1085,8 +1087,8 @@ theorem sandwichedTraceFunctional_mono_traceRight [Nonempty dB]
     Q̃_ α(ρ.traceRight‖σ.traceRight) ≤ Q̃_ α(ρ‖σ) := by
   -- Obtain the twirling unitaries
   obtain ⟨κ, hκ_fin, hκ_ne, V, hV⟩ := exists_twirling_unitaries (dB := dB)
-  letI : Fintype κ := hκ_fin
-  letI : Nonempty κ := hκ_ne
+  let : Fintype κ := hκ_fin
+  let : Nonempty κ := hκ_ne
   -- By unitary invariance, Q̃_α(ρ‖σ) = Q̃_α(V_i ρ V_i†‖V_i σ V_i†) for each i
   have h_inv (i) : Q̃_ α(ρ.conjTensorUnitary (V i)‖σ.conjTensorUnitary (V i)) = Q̃_ α(ρ‖σ) :=
     sandwichedTraceFunctional_conj_tensorUnitary ρ σ (V i)
@@ -1194,7 +1196,7 @@ theorem ker_le_traceRight {ρ σ : MState (dA × dB)}
     intro b
     exact Finset.sum_eq_zero_iff_of_nonneg (fun b _ => h_nonneg b) |>.mp hin b (Finset.mem_univ _)
   have h_σ_zero : ∀ b : dB, σ.M.mat *ᵥ (vecTensorBasis v.ofLp b) = 0 :=
-    fun b => (hσ_psd.dotProduct_mulVec_zero_iff _).mp (h_each_zero b)
+    fun b => hσ_psd.dotProduct_mulVec_zero_iff.mp (h_each_zero b)
   have h_ρ_zero : ∀ b : dB, ρ.M.mat *ᵥ (vecTensorBasis v.ofLp b) = 0 := by
     intro b
     have hmem_σ : (WithLp.toLp 2 (vecTensorBasis v.ofLp b) : EuclideanSpace ℂ _) ∈ σ.M.ker := by
@@ -1226,6 +1228,7 @@ theorem sandwichedRenyiEntropy_mono_traceRight [Nonempty dB]
 /-
 The sandwiched Rényi divergence is invariant under unitary conjugation.
 -/
+set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 400000 in
 theorem sandwichedRenyiEntropy_conj_unitary (hα : 0 < α) (ρ σ : MState d)
     (U : Matrix.unitaryGroup d ℂ) :
@@ -1349,7 +1352,7 @@ theorem sandwichedRenyiEntropy_DPI_gt_one (hα : 1 < α) (ρ σ : MState d₁) (
     D̃_ α(Φ ρ‖Φ σ) ≤ D̃_ α(ρ‖σ) := by
   have _ : Nonempty d₁ := ρ.nonempty
   have _ : Nonempty d₂ := (Φ ρ).nonempty
-  haveI : Inhabited d₂ := Classical.inhabited_of_nonempty ‹_›
+  have : Inhabited d₂ := Classical.inhabited_of_nonempty ‹_›
   let ψ₀ : Ket (d₂ × d₂) := Ket.basis default
   let τ := MState.pure ψ₀
   obtain ⟨U, hU⟩ := Φ.purify_IsUnitary
@@ -1438,7 +1441,7 @@ private lemma sandwichedTraceFunctional_sub_one_div_eventually_le
   have h_r_nonneg : ∀ α : ℝ, 1 < α → 0 ≤ r α := by
     intro α hα
     have h := sandwichedRelRentropy_nonneg (ρ := ρ) (σ := σ) (α := α) (by linarith) hker
-    rw [if_neg hα.ne'] at h
+    rw [ite_eq_right hα.ne'] at h
     simpa [hr_def, sandwichedTraceFunctional] using h
   have h_eq : ∀ α : ℝ, 1 < α → D̃_ α(ρ‖σ) = ENNReal.ofReal (r α) := fun α hα =>
     sandwichedRelRentropy_eq_log_traceFunctional (by linarith) hα.ne' hker

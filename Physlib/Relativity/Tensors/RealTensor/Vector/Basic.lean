@@ -29,7 +29,13 @@ noncomputable section
 namespace Lorentz
 
 /-- Real contravariant Lorentz vector. -/
+@[implicit_reducible]
 def Vector (d : ℕ := 3) := Fin 1 ⊕ Fin d → ℝ
+
+/- `Vector d` is applied directly as a function throughout the library. Marking it
+  implicit-reducible lets such applications typecheck at implicit transparency, so that
+  `rw` and `simp` can match patterns containing them (see the Lean 4.33 release notes on
+  `backward.isDefEq.respectTransparency.types`). -/
 
 namespace Vector
 
@@ -115,6 +121,11 @@ instance innerProductSpace (d : ℕ) : InnerProductSpace ℝ (Vector d) where
   smul_left x y r := by
     simp only [inner_eq_equivEuclid, map_smul]
     exact InnerProductSpace.smul_left (equivEuclid d x) (equivEuclid d y) r
+
+/-- The inner product on `Vector d` as a sum over components. -/
+lemma inner_eq_sum {d : ℕ} (v w : Vector d) : ⟪v, w⟫_ℝ = ∑ μ, v μ * w μ := by
+  rw [inner_eq_equivEuclid, PiLp.inner_apply]
+  simp [mul_comm]
 
 /-- The instance of a `ChartedSpace` on `Vector d`. -/
 instance : ChartedSpace (Vector d) (Vector d) := chartedSpaceSelf (Vector d)
@@ -278,14 +289,14 @@ def basis {d : ℕ} : Basis (Fin 1 ⊕ Fin d) ℝ (Vector d) :=
 lemma basis_apply {d : ℕ} (μ ν : Fin 1 ⊕ Fin d) :
     basis μ ν = if μ = ν then 1 else 0 := by
   simp [basis]
-  erw [Pi.basisFun_apply, Pi.single_apply]
+  rw [Pi.basisFun_apply, Pi.single_apply]
   congr 1
   exact Lean.Grind.eq_congr' rfl rfl
 
 lemma basis_repr_apply {d : ℕ} (p : Vector d) (μ : Fin 1 ⊕ Fin d) :
     basis.repr p μ = p μ := by
   simp [basis]
-  erw [Pi.basisFun_repr]
+  rw [Pi.basisFun_repr]
 
 lemma map_apply_eq_basis_mulVec {d : ℕ} (f : Vector d →ₗ[ℝ] Vector d) (p : Vector d) :
     (f p) = (LinearMap.toMatrix basis basis) f *ᵥ p := by
@@ -433,15 +444,27 @@ open InnerProductSpace
 
 lemma basis_inner {d : ℕ} (μ : Fin 1 ⊕ Fin d) (p : Lorentz.Vector d) :
     ⟪Lorentz.Vector.basis μ, p⟫_ℝ = p μ := by
-  simp [inner_eq_equivEuclid]
-  rw [PiLp.inner_apply]
-  simp
+  simp [inner_eq_sum]
 
 lemma inner_basis {d : ℕ} (p : Lorentz.Vector d) (μ : Fin 1 ⊕ Fin d) :
     ⟪p, Lorentz.Vector.basis μ⟫_ℝ = p μ := by
-  simp [inner_eq_equivEuclid]
-  rw [PiLp.inner_apply]
-  simp
+  simp [inner_eq_sum]
+
+/-- A vector with zero time component and zero spatial part is zero. -/
+lemma eq_zero_of_timeComponent_of_spatialPart {d : ℕ} {u : Vector d} (h0 : u.timeComponent = 0)
+    (hs : u.spatialPart = 0) : u = 0 := by
+  refine ext_of_apply fun i => ?_
+  rcases i with i | i
+  · fin_cases i
+    exact h0
+  · have := congrArg (fun x : EuclideanSpace ℝ (Fin d) => x i) hs
+    simpa [spatialPart_apply_eq_toCoord] using this
+
+/-- The spatial components of a vector whose spatial part has zero norm vanish. -/
+lemma apply_inr_eq_zero_of_norm_spatialPart {d : ℕ} {u : Vector d} (h : ‖u.spatialPart‖ = 0)
+    (i : Fin d) : u (Sum.inr i) = 0 := by
+  have := congrArg (fun x : EuclideanSpace ℝ (Fin d) => x i) (norm_eq_zero.mp h)
+  simpa [spatialPart_apply_eq_toCoord] using this
 
 end Vector
 

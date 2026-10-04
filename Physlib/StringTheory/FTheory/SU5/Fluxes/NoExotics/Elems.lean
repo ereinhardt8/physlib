@@ -6,6 +6,9 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.StringTheory.FTheory.SU5.Fluxes.Basic
+public import Mathlib.Data.Finset.Card
+public import Mathlib.Data.Multiset.Powerset
+public import Mathlib.Tactic.FinCases
 /-!
 
 # Terms of `FluxesFive` and `FluxesTen` with no chiral exotics
@@ -52,8 +55,7 @@ elements of those elements.
 
 ## iv. References
 
-There are no known references for the material in this module.
-
+* None.
 -/
 
 @[expose] public section

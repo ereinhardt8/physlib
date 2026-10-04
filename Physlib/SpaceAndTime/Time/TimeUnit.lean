@@ -5,13 +5,13 @@ Authors: Joseph Tooby-Smith
 -/
 module
 
-public import Mathlib.Analysis.RCLike.Basic
+public import Physlib.Units.PositiveRealUnit
 /-!
 
 # Units on time
 
 A unit of time corresponds to a choice of translationally-invariant
-metric on the time manifold `TimeTransMan`. Such a choice is (non-canonically) equivalent to a
+metric on the time manifold. Such a choice is (non-canonically) equivalent to a
 choice of positive real number. We define the type `TimeUnit` to be equivalent to the
 positive reals.
 
@@ -31,104 +31,25 @@ existence of the time unit of seconds, and construct all other time units from t
 
 open NNReal
 
-/-- The choices of translationally-invariant metrics on the manifold `TimeTransMan`.
+/-- The choices of translationally-invariant metrics on the time manifold.
   Such a choice corresponds to a choice of units for time. -/
 structure TimeUnit : Type where
   /-- The underlying scale of the unit. -/
   val : ℝ
   property : 0 < val
 
+instance : PositiveRealUnitCore TimeUnit where
+  val := TimeUnit.val
+  pos := TimeUnit.property
+  ofVal := fun r hr => ⟨r, hr⟩
+  val_ofVal := by intros; rfl
+  ofVal_val := by intro x; cases x; rfl
+open NNReal
+
 namespace TimeUnit
 
-@[simp]
-lemma val_ne_zero (x : TimeUnit) : x.val ≠ 0 := by
-  exact Ne.symm (ne_of_lt x.property)
+open PositiveRealUnitCore
 
-lemma val_pos (x : TimeUnit) : 0 < x.val := x.property
-
-instance : Inhabited TimeUnit where
-  default := ⟨1, by norm_num⟩
-
-/-!
-
-## Division of TimeUnit
-
--/
-
-noncomputable instance : HDiv TimeUnit TimeUnit ℝ≥0 where
-  hDiv x t := ⟨x.val / t.val, div_nonneg (le_of_lt x.val_pos) (le_of_lt t.val_pos)⟩
-
-lemma div_eq_val (x y : TimeUnit) :
-    x / y = (⟨x.val / y.val, div_nonneg (le_of_lt x.val_pos) (le_of_lt y.val_pos)⟩ : ℝ≥0) := rfl
-
-@[simp]
-lemma div_ne_zero (x y : TimeUnit) : ¬ x / y = (0 : ℝ≥0) := by
-  rw [div_eq_val]
-  refine coe_ne_zero.mp ?_
-  simp [toReal]
-
-@[simp]
-lemma div_pos (x y : TimeUnit) : (0 : ℝ≥0) < x/ y := by
-  apply lt_of_le_of_ne
-  · exact zero_le
-  · exact Ne.symm (div_ne_zero x y)
-
-@[simp]
-lemma div_self (x : TimeUnit) :
-    x / x = (1 : ℝ≥0) := by
-  simp [div_eq_val, x.val_ne_zero]
-  rfl
-
-lemma div_symm (x y : TimeUnit) :
-    x / y = (y / x)⁻¹ := NNReal.eq <| by
-  rw [div_eq_val, inv_eq_one_div, div_eq_val]
-  simp only [one_div, NNReal.coe_inv]
-  rw [toReal, inv_div]
-
-@[simp]
-lemma div_mul_div_coe (x y z : TimeUnit) :
-    (x / y : ℝ) * (y / z : ℝ) = x / z := by
-  simp [div_eq_val, toReal]
-  field_simp
-
-/-!
-
-## The scaling of a time unit
-
--/
-
-/-- The scaling of a time unit by a positive real. -/
-def scale (r : ℝ) (x : TimeUnit) (hr : 0 < r := by norm_num) : TimeUnit :=
-  ⟨r * x.val, mul_pos hr x.val_pos⟩
-
-@[simp]
-lemma scale_div_self (x : TimeUnit) (r : ℝ) (hr : 0 < r) :
-    scale r x hr / x = (⟨r, le_of_lt hr⟩ : ℝ≥0) := by
-  simp [scale, div_eq_val]
-
-@[simp]
-lemma scale_one (x : TimeUnit) : scale 1 x = x := by
-  simp [scale]
-
-@[simp]
-lemma scale_div_scale (x1 x2 : TimeUnit) {r1 r2 : ℝ} (hr1 : 0 < r1) (hr2 : 0 < r2) :
-    scale r1 x1 hr1 / scale r2 x2 hr2 = (⟨r1, le_of_lt hr1⟩ / ⟨r2, le_of_lt hr2⟩) * (x1 / x2) := by
-  refine NNReal.eq ?_
-  simp [scale, div_eq_val]
-  rw [toReal]
-  field_simp
-
-@[simp]
-lemma self_div_scale (x : TimeUnit) (r : ℝ) (hr : 0 < r) :
-    x / scale r x hr = (⟨1/r, _root_.div_nonneg (by simp) (le_of_lt hr)⟩ : ℝ≥0) := by
-  simp [scale, div_eq_val]
-  field_simp
-
-@[simp]
-lemma scale_scale (x : TimeUnit) (r1 r2 : ℝ) (hr1 : 0 < r1) (hr2 : 0 < r2) :
-    scale r1 (scale r2 x hr2) hr1 = scale (r1 * r2) x (mul_pos hr1 hr2) := by
-  simp [scale]
-  ring
 /-!
 
 ## Specific choices of time units
@@ -196,15 +117,27 @@ lemma weeks_div_seconds : weeks / seconds = (604800 : ℝ≥0) := NNReal.eq <| b
   simp [weeks]; rw [toReal]; norm_num
 
 lemma days_div_minutes : days / minutes = (1440 : ℝ≥0) := NNReal.eq <| by
-  simp [days, minutes]; rw [toReal]; norm_num
+  simp [days, minutes]
+  show (24 * 60 * 60 : ℝ) / 60 = ((1440 : ℝ≥0) : ℝ)
+  push_cast
+  norm_num
 
 lemma weeks_div_minutes : weeks / minutes = (10080 : ℝ≥0) := NNReal.eq <| by
-  simp [weeks, minutes]; rw [toReal]; norm_num
+  simp [weeks, minutes]
+  show (7 * 24 * 60 * 60 : ℝ) / 60 = ((10080 : ℝ≥0) : ℝ)
+  push_cast
+  norm_num
 
 lemma days_div_hours : days / hours = (24 : ℝ≥0) := NNReal.eq <| by
-  simp [hours, days]; rw [toReal]; norm_num
+  simp [hours, days]
+  show (24 * 60 * 60 : ℝ) / (60 * 60) = ((24 : ℝ≥0) : ℝ)
+  push_cast
+  norm_num
 
 lemma weeks_div_hours : weeks / hours = (168 : ℝ≥0) := NNReal.eq <| by
-  simp [weeks, hours]; rw [toReal]; norm_num
+  simp [weeks, hours]
+  show (7 * 24 * 60 * 60 : ℝ) / (60 * 60) = ((168 : ℝ≥0) : ℝ)
+  push_cast
+  norm_num
 
 end TimeUnit

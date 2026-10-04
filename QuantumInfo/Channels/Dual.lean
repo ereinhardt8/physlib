@@ -6,7 +6,6 @@ Authors: Alex Meiburg, Dennj Osele
 module
 
 public import QuantumInfo.Channels.Bundled
-public import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
 
 /-! # Duals of matrix map
 
@@ -67,6 +66,7 @@ theorem Dual.trace_eq (M : MatrixMap dIn dOut R) (A : Matrix dIn dIn R) (B : Mat
 --all properties below should provable just from `inner_eq`, since the definition of `dual` itself
 -- is pretty hairy (and maybe could be improved...)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The dual of a `IsHermitianPreserving` map also `IsHermitianPreserving`. -/
 theorem IsHermitianPreserving.dual {M : MatrixMap dIn dOut ℂ} (h : M.IsHermitianPreserving) :
     M.dual.IsHermitianPreserving := by
@@ -391,10 +391,10 @@ omit [Fintype dOut] in
 --PULLOUT
 @[simp]
 theorem HPMap.linearMap_ofHermitianMat (f : HermitianMat dIn ℂ →ₗ[ℝ] HermitianMat dOut ℂ) :
-    LinearMapClass.linearMap (HPMap.ofHermitianMat f) = f := by
+    LinearMap.ofClass (HPMap.ofHermitianMat f) = f := by
   ext1 ⟨x, hx⟩
   ext1
-  simp only [ofHermitianMat, LinearMap.coe_coe]
+  simp only [ofHermitianMat, LinearMap.coe_ofClass]
   simp only [HPMap.apply_hermitianMat_eq, HPMap.map, HermitianMat.mat_mk,
     LinearMap.coe_mk, AddHom.coe_mk]
   conv => enter [2, 1, 2, 1]; rw [← realPart_add_I_smul_imaginaryPart x]
@@ -405,12 +405,10 @@ theorem HPMap.linearMap_ofHermitianMat (f : HermitianMat dIn ℂ →ₗ[ℝ] Her
 omit [Fintype dOut] in
 @[simp]
 theorem HPMap.ofHermitianMat_linearMap (f : HPMap dIn dOut ℂ) :
-    ofHermitianMat (LinearMapClass.linearMap f) = f := by
+    ofHermitianMat (LinearMap.ofClass f) = f := by
   ext : 3
-  simp only [map, ofHermitianMat, instFunLike, LinearMap.coe_coe, HermitianMat.val_eq_coe,
-    HermitianMat.mat_mk, LinearMap.coe_mk, AddHom.coe_mk,
-    ← map_smul, ← map_add]
-  simp only [map_add, map_smul, realPart, imaginaryPart, LinearMap.coe_comp, Function.comp_apply]
+  simp only [map, ofHermitianMat, instFunLike, LinearMap.coe_ofClass, LinearMap.coe_mk, AddHom.coe_mk]
+  simp only [realPart, imaginaryPart, LinearMap.coe_comp, Function.comp_apply]
   simp only [selfAdjointPart,  LinearMap.coe_mk, AddHom.coe_mk,
     HermitianMat.mat_mk,LinearMap.map_smul_of_tower, skewAdjoint.negISMul]
   simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul]
@@ -425,7 +423,7 @@ variable (f : HPMap dIn dOut) (A : HermitianMat dIn ℂ)
 --structure, doesn't go through Module.Basis the same way. Requires the equivalence between ℝ-linear
 --maps of HermitianMats and ℂ-linear maps of matrices.
 def HPMap.hermDual : HPMap dOut dIn :=
-  HPMap.ofHermitianMat (LinearMapClass.linearMap f).adjoint
+  HPMap.ofHermitianMat (LinearMap.ofClass f).adjoint
 
 @[simp]
 theorem HPMap.hermDual_hermDual : f.hermDual.hermDual = f := by
@@ -436,7 +434,7 @@ open RealInnerProductSpace
 /-- The defining property of a dual map: inner products are preserved on the opposite argument. -/
 theorem HPMap.inner_hermDual (B : HermitianMat dOut ℂ) :
     ⟪f A, B⟫ = ⟪A, f.hermDual B⟫ := by
-  change ⟪(LinearMapClass.linearMap f) A, B⟫ = ⟪A, (LinearMapClass.linearMap f.hermDual) B⟫
+  change ⟪(LinearMap.ofClass f) A, B⟫ = ⟪A, (LinearMap.ofClass f.hermDual) B⟫
   rw [hermDual, ← LinearMap.adjoint_inner_right, HPMap.linearMap_ofHermitianMat]
 
 /-- Version of `HPMap.inner_hermDual` that uses HermitiaMat.inner directly. TODO cleanup -/

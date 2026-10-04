@@ -28,10 +28,11 @@ then builds the solid angle and dot product API on sphere points.
  * `dot_blochPoint`: dot product of Bloch vectors in terms of angle differences
 
 ## References
- * [S. Pancharatnam, *Generalized theory of interference, and its
-   applications*, Proc. Indian Acad. Sci. A 44, 247–262 (1956)][pancharatnam1956]
- * [M. V. Berry, *Quantal phase factors accompanying adiabatic changes*,
-   Proc. R. Soc. London A 392, 45–57 (1984)][berry1984]
+
+* S. Pancharatnam, Generalized theory of interference, and its applications, Proc. Indian Acad.
+  Sci. A 44, 247–262 (1956). [ref: pancharatnam1956]
+* M. V. Berry, Quantal phase factors accompanying adiabatic changes, Proc. R. Soc. London A 392,
+  45–57 (1984). [ref: berry1984]
 -/
 
 open Complex Matrix
@@ -53,7 +54,7 @@ private lemma blochVecRaw_norm (α θ : ℝ) :
       (blochVecRaw α θ 2) ^ 2) = 1 := by
   have : (blochVecRaw α θ 0) ^ 2 + (blochVecRaw α θ 1) ^ 2 +
     (blochVecRaw α θ 2) ^ 2 = 1 := by
-    simp [blochVecRaw, Fin.sum_univ_three]
+    simp [blochVecRaw]
     have h1 := Real.sin_sq_add_cos_sq α
     have h2 := Real.sin_sq_add_cos_sq θ
     nlinarith [sq_nonneg (Real.sin α * Real.cos θ),
@@ -66,8 +67,7 @@ private lemma blochVecRaw_norm (α θ : ℝ) :
 def blochPoint (α θ : ℝ) : BlochSphere :=
   ⟨(WithLp.equiv 2 _).symm (blochVecRaw α θ), by
     rw [Metric.mem_sphere, dist_comm, EuclideanSpace.dist_eq]
-    simp [EuclideanSpace.norm_eq, Fin.sum_univ_three, sub_zero, blochVecRaw_norm α θ,
-      Real.sqrt_one]⟩
+    simp [Fin.sum_univ_three, blochVecRaw_norm α θ]⟩
 
 /-- The underlying vector of a `blochPoint`. -/
 lemma blochPoint_val (α θ : ℝ) :

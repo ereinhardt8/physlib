@@ -6,7 +6,7 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.QFT.PerturbationTheory.WickContraction.Uncontracted
-public import Physlib.Mathematics.Fin
+public import Physlib.Mathematics.ForMathlib.Fin
 /-!
 
 # Erasing an element from a contraction
@@ -35,6 +35,7 @@ def erase (c : WickContraction n.succ) (i : Fin n.succ) : WickContraction n := b
     rw [← Finset.disjoint_map i.succAboveEmb, ← (Finset.map_injective i.succAboveEmb).eq_iff]
     exact c.2.2 _ ha _ hb
 
+set_option backward.isDefEq.respectTransparency false in
 lemma mem_erase_uncontracted_iff (c : WickContraction n.succ) (i : Fin n.succ) (j : Fin n) :
     j ∈ (c.erase i).uncontracted ↔
     i.succAbove j ∈ c.uncontracted ∨ c.getDual? (i.succAbove j) = some i := by

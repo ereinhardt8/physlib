@@ -6,21 +6,17 @@ Authors: Alex Meiburg, Leonardo A. Lessa
 module
 
 public import QuantumInfo.ForMathlib.ContinuousLinearMap
-public import QuantumInfo.ForMathlib.ComplexLaplaceTransform
-public import QuantumInfo.ForMathlib.ContinuousSup
-public import QuantumInfo.ForMathlib.Filter
 public import QuantumInfo.ForMathlib.HermitianMat
 public import QuantumInfo.ForMathlib.Isometry
 public import QuantumInfo.ForMathlib.LinearEquiv
 public import QuantumInfo.ForMathlib.MatrixNorm.TraceNorm
 public import QuantumInfo.ForMathlib.Matrix
-public import QuantumInfo.ForMathlib.Minimax
 public import QuantumInfo.ForMathlib.Misc
-public import QuantumInfo.ForMathlib.Unitary
 public import QuantumInfo.ClassicalInfo.Distribution
 public import QuantumInfo.States.Pure.Braket
 
 public import Mathlib.Logic.Equiv.Basic
+public import Mathlib.Tactic.LinearCombinationPrime
 
 /-!
 Finite dimensional quantum mixed states, ρ.
@@ -264,6 +260,7 @@ end exp_val
 
 section pure
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A mixed state can be constructed as a pure state arising from a ket. -/
 def pure (ψ : Ket d) : MState d where
   M := {
@@ -277,6 +274,7 @@ def pure (ψ : Ket d) : MState d where
     simp [HermitianMat.trace_eq_re_trace, Matrix.trace, Matrix.vecMulVec_apply, Bra.eq_conj, h₁]
     exact ψ.normalized
 
+set_option backward.isDefEq.respectTransparency false in
 theorem pure_inner : ⟪pure ψ, pure φ⟫_Prob = ‖Braket.dot ψ φ‖^2 := by
   simp [MState.inner_def, HermitianMat.inner_def, pure, Matrix.vecMulVec_mul_vecMulVec,
     Braket.dot_eq_dotProduct, Matrix.trace_smul]
@@ -294,6 +292,7 @@ theorem pure_inner : ⟪pure ψ, pure φ⟫_Prob = ‖Braket.dot ψ φ‖^2 := b
 theorem pure_apply {i j : d} : (pure ψ).m i j = (ψ i) * conj (ψ j) := by
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem pure_mul_self : (pure ψ).m * (pure ψ).m = (pure ψ : Matrix d d ℂ) := by
   dsimp [pure, MState.m]
   simp [Matrix.vecMulVec_mul_vecMulVec, ← Braket.dot_eq_dotProduct]
@@ -417,7 +416,7 @@ theorem pure_of_constant_spectrum (h : ∃ i, ρ.spectrum = ProbDistribution.con
   have hsum : ∀ x ∈ Finset.univ, x ∉ ({i} : Finset d) → (ρ.M.H.eigenvectorBasis x j) * (↑(if x = i then 1 else 0) : ℝ) * (starRingEnd ℂ) (ρ.Hermitian.eigenvectorBasis x k) = 0 := by
     intros x hx hxnoti
     rw [Finset.mem_singleton] at hxnoti
-    rw [if_neg hxnoti, Complex.ofReal_zero]
+    rw [ite_eq_right hxnoti, Complex.ofReal_zero]
     ring
   simp_rw [←Finset.sum_subset (Finset.subset_univ {i}) hsum, Finset.sum_singleton, reduceIte, Complex.ofReal_one, mul_one]
   rfl
@@ -522,6 +521,7 @@ theorem pure_prod_pure (ψ₁ : Ket d₁) (ψ₂ : Ket d₂) : pure (ψ₁ ⊗�
 
 end prod
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A representation of a classical distribution as a quantum state, diagonal in the given basis. -/
 def ofClassical (dist : ProbDistribution d) : MState d where
   M := diagonal ℂ (fun x ↦ dist x)
@@ -784,6 +784,7 @@ theorem pureQ_injective {d : Type*} [Fintype d] [DecidableEq d] : Function.Injec
   simp [pureQ] at h
   exact Quotient.sound ((PhaseEquiv_iff_pure_eq _ _).mpr h)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem pure_separable_imp_IsProd {d₁ d₂ : Type*} [Fintype d₁] [Fintype d₂] [DecidableEq d₁] [DecidableEq d₂]
     (ψ : Ket (d₁ × d₂)) (h : IsSeparable (pure ψ)) : ψ.IsProd := by
   obtain ⟨ ρLRs, ps, hps ⟩ := h;
@@ -902,7 +903,7 @@ theorem pure_iff_rank_eq_one {d : Type*} [Fintype d] [DecidableEq d] (ρ : MStat
             exact not_forall.mp fun h => by simp [ h ] at h_diag;
           rw [ Finset.sum_eq_add_sum_sdiff_singleton i _ (by simp) ] at h_diag;
           exact ⟨i, hi, fun j hj => Classical.not_not.1 fun hj' =>
-            absurd h_diag ( by rw [ if_neg hi ] ; exact ne_of_gt ( lt_add_of_pos_right _ ( lt_of_lt_of_le ( by simp [ hj' ] ) ( Finset.single_le_sum ( fun x _ => by positivity ) ( Finset.mem_sdiff.2 ⟨ Finset.mem_univ j, by simp [ hj ] ⟩ ) ) ) ) ) ⟩;
+            absurd h_diag ( by rw [ ite_eq_right hi ] ; exact ne_of_gt ( lt_add_of_pos_right _ ( lt_of_lt_of_le ( by simp [ hj' ] ) ( Finset.single_le_sum ( fun x _ => by positivity ) ( Finset.mem_sdiff.2 ⟨ Finset.mem_univ j, by simp [ hj ] ⟩ ) ) ) ) ) ⟩;
         -- Since the diagonal matrix in the spectral theorem has exactly one non-zero entry, we can write ρ.m as |ψ⟩⟨ψ| for some ket ψ.
         use fun j => (h_herm.eigenvectorUnitary : Matrix d d ℂ) j i * Real.sqrt (h_herm.eigenvalues i);
         convert this using 1
@@ -1311,6 +1312,7 @@ section finprod
 variable {ι : Type u} [DecidableEq ι] [fι : Fintype ι]
 variable {dI : ι → Type v} [∀(i :ι), Fintype (dI i)] [∀(i :ι), DecidableEq (dI i)]
 
+set_option backward.isDefEq.respectTransparency false in
 def piProd (ρi : (i:ι) → MState (dI i)) : MState ((i:ι) → dI i) where
   M := {
     val := Matrix.piProd (fun i ↦ (ρi i).m)

@@ -6,7 +6,7 @@ Authors: Nathaneal Sajan
 module
 
 public import Physlib.Particles.StandardModel.Basic
-public import Physlib.Relativity.Tensors.ComplexTensor.Basic
+public import Physlib.Relativity.Fermions.Weyl.LeftHanded
 /-!
 # Lepton doublets
 
@@ -84,7 +84,7 @@ def valEquiv : LeptonDoublet ≃ Fermion.LeftHandedWeyl ⊗[ℂ] EuclideanSpace 
 
 instance : AddCommGroup LeptonDoublet := Equiv.addCommGroup valEquiv
 
-instance : Module ℂ LeptonDoublet := Equiv.module ℂ valEquiv
+instance : Module ℂ LeptonDoublet := AddEquiv.module ℂ { valEquiv with map_add' _ _ := rfl }
 
 /-- The linear identification with the underlying tensor product. -/
 def valLinEquiv : LeptonDoublet ≃ₗ[ℂ]

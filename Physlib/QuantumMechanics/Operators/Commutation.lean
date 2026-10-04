@@ -6,15 +6,17 @@ Authors: Gregory J. Loges
 module
 
 public import Physlib.Mathematics.KroneckerDelta.Basic
-public import Physlib.Relativity.Tensors.RealTensor.Vector.Tensorial
-public import Physlib.QuantumMechanics.Operators.AngularMomentum
+public import Physlib.QuantumMechanics.Operators.Position
+public import Physlib.QuantumMechanics.Operators.Momentum
+public import Mathlib.Algebra.Lie.OfAssociative
 /-!
 
 # Commutation relations
 
 ## i. Overview
 
-In this module we compute the commutators for common operators acting on Schwartz maps on `Space d`.
+In this module we compute the commutators of position and momentum operators on Schwartz maps
+on `Space d`, including regularized powers of the radius.
 
 Commutator lemmas come in three flavors:
   - 1. `a_commutation_b` lemmas are of the form `⁅a, b⁆ = (⋯)`.
@@ -24,13 +26,6 @@ Commutator lemmas come in three flavors:
 ## ii. Key results
 
 - `position_commutation_momentum` : The canonical commutation relations.
-- `angularMomentum_commutation_position` : The position operator transforms as a vector under
-    infinitessimal rotations.
-- `angularMomentum_commutation_radiusRegPow` : Functions of `‖x‖²` commute with the angular momenta.
-- `angularMomentum_commutation_momentum` : The momentum operator transforms as a vector under
-    infinitessimal rotations.
-- `angularMomentum_commutation_angularMomentum` : Angular momenta generate an `𝔰𝔬(d)` algebra.
-- `angularMomentumSqr_commutation_angularMomentum` : `𝐋²` is a quadratic Casimir of `𝔰𝔬(d)`.
 
 ## iii. Table of contents
 
@@ -39,12 +34,10 @@ Commutator lemmas come in three flavors:
   - B.1. Position / position
   - B.2. Momentum / momentum
   - B.3. Position / momentum
-  - B.4. Angular momentum / position
-  - B.5. Angular momentum / momentum
-  - B.6. Angular momentum / angular momentum
 
 ## iv. References
 
+* None.
 -/
 
 @[expose] public section
@@ -56,7 +49,7 @@ open KroneckerDelta
 open Bracket
 open SchwartzMap ContinuousLinearMap
 
-variable {d : ℕ} (i j k l : Fin d) (ε : ℝˣ) (s t : ℝ)
+variable {d : ℕ} (i j k : Fin d) (ε : ℝˣ) (s t : ℝ)
 
 /-!
 
@@ -78,6 +71,11 @@ lemma comp_eq_comp_add_commute (A B : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d,
     A ∘L B = B ∘L A + ⁅A, B⁆ := by
   dsimp only [Bracket.bracket]
   simp only [ContinuousLinearMap.mul_def, add_sub_cancel]
+
+/-- The identity commutes with everything. -/
+lemma id_commutation (A : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ)) :
+    ⁅ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ), A⁆ = 0 := by
+  rw [Ring.lie_def, ← ContinuousLinearMap.one_def, one_mul, mul_one, sub_self]
 
 lemma comp_eq_comp_sub_commute (A B : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ)) :
     A ∘L B = B ∘L A - ⁅B, A⁆ := by
@@ -164,6 +162,13 @@ lemma position_commutation_momentum : ⁅𝐱 i, 𝐩 j⁆ =
   · simp
   · simp [eq_zero_of_ne hne, hne.symm]
 
+/-- The canonical commutation relations, pointwise: `xᵢ (pᵢ ψ)(x) - (pᵢ (xᵢ ψ))(x) = iℏ ψ(x)`. -/
+lemma position_commutation_momentum_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d) :
+    ((x i : ℝ) : ℂ) * 𝐩 i ψ x - 𝐩 i (𝐱 i ψ) x = I * ℏ * ψ x := by
+  have h := congrArg (fun T : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) => T ψ x)
+    (position_commutation_momentum (d := d) i i)
+  simpa [Ring.lie_def, eq_one_of_same] using h
+
 lemma momentum_comp_position_eq : 𝐩 j ∘L 𝐱 i =
     𝐱 i ∘L 𝐩 j - (I * ℏ) • δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
   rw [comp_eq_comp_sub_commute, position_commutation_momentum]
@@ -233,92 +238,6 @@ lemma radiusRegPow_commutation_momentumSqr :
       ring_nf
       simp_rw [← sub_add, sub_sub, ← add_smul, I_sq, sub_eq_add_neg, ← neg_smul]
       ring_nf
-
-/-!
-
-### B.4. Angular momentum / position
-
--/
-
-lemma angularMomentum_commutation_position :
-    ⁅𝐋 i j, 𝐱 k⁆ = (I * ℏ) • (δ[i,k] • 𝐱 j - δ[j,k] • 𝐱 i) := by
-  trans 𝐱 i ∘L ⁅𝐩 j, 𝐱 k⁆ - 𝐱 j ∘L ⁅𝐩 i, 𝐱 k⁆
-  · simp [angularMomentumOperator, leibniz_lie]
-  simp only [← lie_skew (𝐩 _), comp_neg, sub_neg_eq_add, add_comm, ← sub_eq_add_neg,
-    position_commutation_momentum, comp_smul, comp_id, smul_sub, symm k _]
-
-@[simp]
-lemma angularMomentum_commutation_radiusRegPow : ⁅𝐋 i j, 𝐫₀[d] ε s⁆ = 0 := by
-  trans 𝐱 i ∘L ⁅𝐩 j, 𝐫₀ ε s⁆ - 𝐱 j ∘L ⁅𝐩 i, 𝐫₀ ε s⁆
-  · simp [angularMomentumOperator, leibniz_lie]
-  simp [← lie_skew (𝐩 _), radiusRegPow_commutation_momentum, comp_neg,
-    ← position_comp_radiusRegPow_commute, ← comp_assoc, position_comp_commute]
-
-lemma angularMomentum_comp_radiusRegPow_commute : 𝐋 i j ∘L 𝐫₀ ε s = 𝐫₀ ε s ∘L 𝐋 i j := by
-  rw [comp_eq_comp_add_commute, angularMomentum_commutation_radiusRegPow, add_zero]
-
-@[simp]
-lemma angularMomentumSqr_commutation_radiusRegPow : ⁅𝐋²[d], 𝐫₀[d] ε s⁆ = 0 := by
-  simp [angularMomentumOperatorSqr, sum_lie, leibniz_lie]
-
-lemma angularMomentumSqr_comp_radiusRegPow_commute : 𝐋² ∘L 𝐫₀[d] ε s = 𝐫₀ ε s ∘L 𝐋² := by
-  rw [comp_eq_comp_add_commute, angularMomentumSqr_commutation_radiusRegPow, add_zero]
-
-/-!
-
-### B.5. Angular momentum / momentum
-
--/
-
-lemma angularMomentum_commutation_momentum :
-    ⁅𝐋 i j, 𝐩 k⁆ = (I * ℏ) • (δ[i,k] • 𝐩 j - δ[j,k] • 𝐩 i) := by
-  trans ⁅𝐱 i, 𝐩 k⁆ ∘L 𝐩 j - ⁅𝐱 j, 𝐩 k⁆ ∘L 𝐩 i
-  · simp [angularMomentumOperator, leibniz_lie]
-  simp only [position_commutation_momentum, smul_comp, id_comp, smul_sub]
-
-lemma momentum_comp_angularMomentum_eq :
-    𝐩 k ∘L 𝐋 i j = 𝐋 i j ∘L 𝐩 k - (I * ℏ) • (δ[i,k] • 𝐩 j - δ[j,k] • 𝐩 i) := by
-  rw [comp_eq_comp_sub_commute, angularMomentum_commutation_momentum]
-
-@[simp]
-lemma angularMomentum_commutation_momentumSqr : ⁅𝐋 i j, 𝐩[d] ⬝ᵥ 𝐩⁆ = 0 := by
-  simp only [dotProduct, mul_def, lie_sum, lie_leibniz, angularMomentum_commutation_momentum,
-    comp_smul, comp_sub, smul_comp, sub_comp, ← smul_add, ← Finset.smul_sum, Finset.sum_add_distrib,
-    Finset.sum_sub_distrib, sum_smul, sub_add_sub_cancel, sub_self, smul_zero]
-
-lemma momentumSqr_comp_angularMomentum_commute : (𝐩 ⬝ᵥ 𝐩) ∘L 𝐋 i j = 𝐋 i j ∘L (𝐩 ⬝ᵥ 𝐩) := by
-  rw [comp_eq_comp_sub_commute, angularMomentum_commutation_momentumSqr, sub_zero]
-
-@[simp]
-lemma angularMomentumSqr_commutation_momentumSqr : ⁅𝐋²[d], 𝐩[d] ⬝ᵥ 𝐩⁆ = 0 := by
-  simp [angularMomentumOperatorSqr, sum_lie, leibniz_lie]
-
-/-!
-
-### B.6. Angular momentum / angular momentum
-
--/
-
-lemma angularMomentum_commutation_angularMomentum : ⁅𝐋 i j, 𝐋 k l⁆ =
-    (I * ℏ) • (δ[i,k] • 𝐋 j l - δ[i,l] • 𝐋 j k - δ[j,k] • 𝐋 i l + δ[j,l] • 𝐋 i k) := by
-  nth_rw 2 [angularMomentumOperator]
-  simp only [angularMomentum_commutation_position, angularMomentum_commutation_momentum,
-    lie_sub, lie_leibniz, comp_smul, smul_comp, comp_sub, sub_comp, ← smul_add, ← smul_sub]
-  dsimp [angularMomentumOperator]
-  ext
-  simp only [nsmul_eq_mul, smul_apply, sub_apply, add_apply, mul_apply_eq_comp, comp_apply,
-    _root_.natCast_apply, positionCLM_apply, momentumCLM_apply, neg_mul, mul_neg, smul_neg,
-    sub_neg_eq_add, smul_eq_mul, smul_add]
-  ring
-
-@[simp]
-lemma angularMomentumSqr_commutation_angularMomentum : ⁅𝐋²[d], 𝐋 i j⁆ = 0 := by
-  simp only [angularMomentumOperatorSqr, smul_lie, sum_lie, leibniz_lie, ← smul_add, comp_smul,
-    comp_add, comp_sub, smul_comp, add_comp, sub_comp, angularMomentum_commutation_angularMomentum,
-    angularMomentumOperator_antisymm _ i, angularMomentumOperator_antisymm j _, symm _ i, symm _ j,
-    sum_smul, ← Finset.smul_sum, Finset.sum_add_distrib, Finset.sum_sub_distrib]
-  abel_nf
-  simp [smul_zero]
 
 end
 end QuantumMechanics
